@@ -207,7 +207,7 @@
       <div class="section-title">3. Generate and preview updated signature</div>
       <div class="button-row">
         <button id="generateBtn" disabled>Generate</button>
-        <button id="copyBtn" class="secondary" type="button" disabled>Copy signature HTML</button>
+        <button id="copyBtn" class="secondary" type="button" disabled>Copy signature</button>
       </div>
 
       <div class="output-wrapper">
@@ -323,7 +323,7 @@
           const data = [new ClipboardItem({ "text/html": blob })];
           await navigator.clipboard.write(data);
           copyBtn.textContent = "Copied!";
-          setTimeout(() => (copyBtn.textContent = "Copy signature HTML"), 1200);
+          setTimeout(() => (copyBtn.textContent = "Copy signature"), 1200);
           return;
         } catch (err) {
           console.warn("Rich clipboard failed, falling back to text-only copy.", err);
@@ -336,7 +336,7 @@
       try {
         document.execCommand("copy");
         copyBtn.textContent = "Copied!";
-        setTimeout(() => (copyBtn.textContent = "Copy signature HTML"), 1200);
+        setTimeout(() => (copyBtn.textContent = "Copy signature"), 1200);
       } catch (err) {
         console.error("Copy failed", err);
       } finally {
