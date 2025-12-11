@@ -11,40 +11,40 @@
     <img class="h-9 w-auto" src="https://cdn.prod.website-files.com/6826f1bc2fc92556aa2497cc/69392412e6b34a38bb174dc6_Signature%20Tool%20Logo.png" alt="Signature Tool logo" />
   </header>
   <section class="max-w-4xl mx-auto text-center px-4 py-[120px]">
-    <h1 class="mb-3">Edit and update email signatures with ease</h1>
-    <p class="text-[20px] text-gray-600">The only tool you need to manage and edit HTML signatures across your organisation</p>
+    <h1 class="hivory-h1 mb-3">Edit and update email signatures with ease</h1>
+    <p class="hivory-paragraph-large text-gray-600">The only tool you need to manage and edit HTML signatures across your organisation</p>
   </section>
 
   <div class="max-w-5xl mx-auto mt-6 bg-white rounded-xl shadow-lg p-5 sm:p-6">
-    <h1 class="text-2xl font-semibold mb-1">Email Signature Field Replacer</h1>
-    <p class="text-sm text-gray-600 mb-4">Paste your HTML email signature, detect fields (name, title, email, phone), then generate a new version with updated details.</p>
+    <h2 class="hivory-h3 mb-1">Email Signature Field Replacer</h2>
+    <p class="hivory-paragraph-small text-gray-600 mb-4">Paste your HTML email signature, detect fields (name, title, email, phone), then generate a new version with updated details.</p>
 
     <div class="mb-6">
-      <div class="text-base font-semibold mb-2">1. Paste your HTML signature</div>
-      <label for="signatureInput" class="text-sm font-semibold block mb-1">Signature HTML</label>
+      <div class="hivory-h5 mb-2">1. Paste your HTML signature</div>
+      <label for="signatureInput" class="hivory-paragraph-small font-semibold block mb-1">Signature HTML</label>
       <textarea id="signatureInput" class="w-full min-h-[160px] rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Paste your HTML email signature here..."></textarea>
 
       <div class="flex flex-wrap gap-2 mt-3">
         <button id="detectBtn" class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed">Find fields</button>
         <button id="clearBtn" class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold bg-gray-200 text-gray-900 hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed" type="button">Clear</button>
       </div>
-      <div id="detectStatus" class="text-sm text-gray-500 mt-2"></div>
+      <div id="detectStatus" class="hivory-paragraph-small text-gray-500 mt-2"></div>
     </div>
 
     <div class="mb-6">
       <div class="flex items-center justify-between gap-2">
-        <div class="text-base font-semibold flex items-center">
+        <div class="hivory-h5 flex items-center">
           2. Edit the detected fields
           <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 uppercase tracking-[0.03em] ml-1">Auto-detected</span>
         </div>
-        <span class="text-xs text-gray-500">You can change the values before generating.</span>
+        <span class="hivory-paragraph-small text-gray-500">You can change the values before generating.</span>
       </div>
       <div id="fieldsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"></div>
-      <div id="noFieldsMsg" class="text-xs text-gray-500 mt-1"></div>
+      <div id="noFieldsMsg" class="hivory-paragraph-small text-gray-500 mt-1"></div>
     </div>
 
     <div class="mb-2">
-      <div class="text-base font-semibold mb-2">3. Generate and preview updated signature</div>
+      <div class="hivory-h5 mb-2">3. Generate and preview updated signature</div>
       <div class="flex flex-wrap gap-2">
         <button id="generateBtn" class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed" disabled>Generate</button>
         <button id="copyBtn" class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold bg-gray-200 text-gray-900 hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed" type="button" disabled>Copy signature</button>
@@ -52,17 +52,17 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4 mt-4">
         <div class="min-w-0">
-          <label for="outputHtml" class="text-sm font-semibold block mb-1">Updated HTML</label>
+          <label for="outputHtml" class="hivory-paragraph-small font-semibold block mb-1">Updated HTML</label>
           <textarea id="outputHtml" class="w-full min-h-[160px] rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Your updated HTML will appear here..." readonly></textarea>
-          <div class="text-xs text-gray-500 mt-1">Copy this HTML or use the button above to copy it with rich formatting.</div>
+          <div class="hivory-paragraph-small text-gray-500 mt-1">Copy this HTML or use the button above to copy it with rich formatting.</div>
         </div>
 
         <div class="min-w-0">
-          <label class="text-sm font-semibold block mb-1">Preview</label>
+          <label class="hivory-paragraph-small font-semibold block mb-1">Preview</label>
           <div class="rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
             <iframe id="previewFrame" title="Signature preview" class="w-full border-0 bg-white min-h-[150px]"></iframe>
           </div>
-          <div class="text-xs text-gray-500 mt-1">
+          <div class="hivory-paragraph-small text-gray-500 mt-1">
             This is how your signature will look when pasted into your email client.
           </div>
         </div>
