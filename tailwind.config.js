@@ -3,8 +3,9 @@ module.exports = {
   darkMode: ["class"],
   content: [
     "./index.html",
-    "./components/**/*.{js,html}",
-    "./lib/**/*.{js,html}",
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./lib/**/*.{js,jsx,ts,tsx}",
   ],
   safelist: [
     'hivory-h1',

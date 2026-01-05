@@ -4,8 +4,10 @@
   "description": "This is a tiny app that makes editing html email signatures easier for clients",
   "main": "index.js",
   "scripts": {
-    "dev": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
-    "build": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
   },
   "repository": {
     "type": "git",
@@ -19,15 +21,22 @@
   },
   "homepage": "https://github.com/Raphael5000/email-signature-tool#readme",
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.22",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.14",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vite": "^5.4.2"
   },
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-navigation-menu": "^1.2.14",
+    "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide": "^0.454.0",
+    "lucide-react": "^0.454.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "tailwind-merge": "^2.5.4"
   }
 }
