@@ -4,6 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   resolve: {
     alias: {
       'components': path.resolve(__dirname, './components'),
@@ -21,6 +22,11 @@ export default defineConfig({
           'radix-vendor': ['@radix-ui/react-navigation-menu', '@radix-ui/react-label', '@radix-ui/react-slot'],
         },
       },
+    },
+  },
+  server: {
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8',
     },
   },
 })
