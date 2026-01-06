@@ -310,6 +310,16 @@ function App() {
                 Generator
               </NavigationMenuLink>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink 
+                href="#" 
+                disabled
+                className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50"
+                style={{ opacity: 0.5 }}
+              >
+                Inspiration
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -343,6 +353,13 @@ function App() {
                 onClick={(e) => e.preventDefault()}
               >
                 Generator
+              </a>
+              <a
+                href="#"
+                className="px-6 py-3 text-sm font-medium text-gray-500 opacity-50 cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
+              >
+                Inspiration
               </a>
             </nav>
           </div>
