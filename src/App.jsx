@@ -65,22 +65,6 @@ function App() {
 
   const detectFieldsFromHtml = (html) => {
     const fields = []
-    const seen = new Set()
-
-    // Helper to add field if not duplicate
-    const addField = (key, label, originalValue, suggestedValue = null) => {
-      if (!originalValue || originalValue.trim().length === 0) return
-      const uniqueKey = `${label}::${originalValue}`
-      if (seen.has(uniqueKey)) return
-      seen.add(uniqueKey)
-      fields.push({
-        key: key || `field_${fields.length}`,
-        label,
-        originalValue: originalValue.trim(),
-        suggestedValue: suggestedValue !== null ? suggestedValue : originalValue.trim(),
-        enabled: true // New property to allow users to toggle fields
-      })
-    }
 
     // Parse HTML
     const wrapperHtml = "<div>" + html + "</div>"
@@ -92,156 +76,238 @@ function App() {
       doc = null
     }
 
-    // 1) Extract all links/URLs (over-detect)
-    const urlRegex = /https?:\/\/[^\s<>"']+|www\.[^\s<>"']+/gi
-    const urlMatches = html.match(urlRegex) || []
-    urlMatches.forEach((url, index) => {
-      addField(`link_${index}`, `Link ${index + 1}`, url)
-    })
+    // Helper to extract text content (removing HTML tags)
+    const getTextContent = (str) => {
+      if (!doc) return str.replace(/<[^>]+>/g, '').trim()
+      const temp = doc.createElement('div')
+      temp.innerHTML = str
+      return temp.textContent || temp.innerText || ''
+    }
 
-    // Also extract href attributes from anchor tags
+    // 1) Email - detect both displayed text and mailto: link
+    const emailRegex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
+    let emailValue = null
+    const emailTextMatches = html.match(emailRegex) || []
+    
+    // Find mailto: links first (prioritize)
     if (doc) {
-      const links = doc.querySelectorAll('a[href]')
-      links.forEach((link, index) => {
-        const href = link.getAttribute('href')
-        if (href && (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:'))) {
-          const linkText = link.textContent.trim() || href
-          addField(`link_href_${index}`, `Link: ${linkText.substring(0, 30)}`, href)
+      const mailtoLinks = doc.querySelectorAll('a[href^="mailto:"]')
+      if (mailtoLinks.length > 0) {
+        emailValue = mailtoLinks[0].getAttribute('href').replace('mailto:', '').trim()
+      }
+    }
+    
+    // If no mailto link, use first email found in text
+    if (!emailValue && emailTextMatches.length > 0) {
+      emailValue = emailTextMatches[0]
+    }
+    
+    if (emailValue) {
+      // Collect all instances to replace (both text and mailto: links)
+      const targetsToReplace = new Set()
+      targetsToReplace.add(emailValue)
+      targetsToReplace.add(`mailto:${emailValue}`)
+      
+      // Also add any other email matches that might be the same
+      emailTextMatches.forEach(match => {
+        if (match.toLowerCase() === emailValue.toLowerCase()) {
+          targetsToReplace.add(match)
         }
+      })
+      
+      fields.push({
+        key: "email",
+        label: "Email",
+        originalValue: emailValue,
+        suggestedValue: emailValue,
+        enabled: true,
+        replacementTargets: Array.from(targetsToReplace)
       })
     }
 
-    // 2) Email addresses (all instances)
-    const emailRegex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
-    const emailMatches = html.match(emailRegex) || []
-    emailMatches.forEach((email, index) => {
-      addField(`email_${index}`, index === 0 ? "Email" : `Email ${index + 1}`, email)
-    })
-
-    // 3) Phone numbers (all instances)
+    // 2) Phone - detect both displayed text and tel: link
     const phoneRegex = /(\+?\d[\d\s().-]{7,}\d)/g
-    const phoneMatches = html.match(phoneRegex) || []
-    phoneMatches.forEach((phone, index) => {
-      const cleaned = phone.trim()
-      addField(`phone_${index}`, index === 0 ? "Phone" : `Phone ${index + 1}`, cleaned)
-    })
-
-    // 4) Parse text nodes from HTML
-    let textNodes = []
+    let phoneValue = null
+    const phoneTextMatches = html.match(phoneRegex) || []
+    
+    // Find tel: links first (prioritize)
     if (doc) {
-      textNodes = getTextNodes(doc.body)
-        .map((n) => n.nodeValue.trim())
-        .filter((t) => t.length > 0)
-    } else {
-      // Fallback: simple split on tags
-      textNodes = html
-        .replace(/<[^>]+>/g, " ")
-        .split(/\s{2,}/)
-        .map((t) => t.trim())
-        .filter((t) => t)
+      const telLinks = doc.querySelectorAll('a[href^="tel:"]')
+      if (telLinks.length > 0) {
+        phoneValue = telLinks[0].getAttribute('href').replace('tel:', '').trim()
+      }
+    }
+    
+    // If no tel link, use first phone found in text
+    if (!phoneValue && phoneTextMatches.length > 0) {
+      phoneValue = phoneTextMatches[0].trim()
+    }
+    
+    if (phoneValue) {
+      // Collect all instances to replace (both text and tel: links)
+      const targetsToReplace = new Set()
+      targetsToReplace.add(phoneValue)
+      targetsToReplace.add(`tel:${phoneValue}`)
+      
+      // Also add any other phone matches that might be the same (normalize for comparison)
+      const normalizePhone = (p) => p.replace(/[\s().-]/g, '')
+      const normalizedPhoneValue = normalizePhone(phoneValue)
+      
+      phoneTextMatches.forEach(match => {
+        const normalizedMatch = normalizePhone(match.trim())
+        if (normalizedMatch === normalizedPhoneValue) {
+          targetsToReplace.add(match.trim())
+        }
+      })
+      
+      fields.push({
+        key: "phone",
+        label: "Phone",
+        originalValue: phoneValue,
+        suggestedValue: phoneValue,
+        enabled: true,
+        replacementTargets: Array.from(targetsToReplace)
+      })
     }
 
-    // 5) Look for common label patterns (Name, Title, Position, etc.)
-    const labelPatterns = [
-      { pattern: /(?:name|full\s*name|your\s*name)[\s:]*([^\n<]+)/i, label: "Name", key: "name" },
-      { pattern: /(?:title|job\s*title|position|role)[\s:]*([^\n<]+)/i, label: "Title", key: "title" },
-      { pattern: /(?:position|job\s*position)[\s:]*([^\n<]+)/i, label: "Position", key: "position" },
-      { pattern: /(?:company|organization|org)[\s:]*([^\n<]+)/i, label: "Company", key: "company" },
-      { pattern: /(?:department|dept)[\s:]*([^\n<]+)/i, label: "Department", key: "department" },
-      { pattern: /(?:address|location)[\s:]*([^\n<]+)/i, label: "Address", key: "address" },
-      { pattern: /(?:website|web|site)[\s:]*([^\n<]+)/i, label: "Website", key: "website" },
+    // 3) Name - look for name patterns or first meaningful text
+    let nameFound = false
+    
+    // Check for label patterns
+    const namePatterns = [
+      /(?:name|full\s*name|your\s*name)[\s:]*([^\n<]+)/i,
+      /full\s*name/i,
+      /your\s*name/i
     ]
-
-    labelPatterns.forEach(({ pattern, label, key }) => {
-      const matches = html.match(pattern)
-      if (matches && matches[1]) {
-        const value = matches[1].trim()
-        if (value && value.length > 0) {
-          addField(key, label, value)
+    
+    for (const pattern of namePatterns) {
+      const match = html.match(pattern)
+      if (match) {
+        const nameValue = match[1] ? match[1].trim() : match[0].trim()
+        if (nameValue && nameValue.length > 0) {
+          fields.push({
+            key: "name",
+            label: "Name",
+            originalValue: nameValue,
+            suggestedValue: nameValue === match[0] ? "" : nameValue,
+            enabled: true
+          })
+          nameFound = true
+          break
         }
       }
-    })
+    }
 
-    // 6) Check for common placeholders
-    const placeholders = [
-      { pattern: /full\s*name/i, label: "Full name", key: "fullName" },
-      { pattern: /this\s*is\s*a\s*title/i, label: "Job title", key: "title" },
-      { pattern: /your\s*name/i, label: "Name", key: "name" },
-      { pattern: /your\s*title/i, label: "Title", key: "title" },
-      { pattern: /your\s*position/i, label: "Position", key: "position" },
-      { pattern: /company\s*name/i, label: "Company", key: "company" },
+    // If no name found, try to detect from text nodes (first capitalized text that looks like a name)
+    if (!nameFound && doc) {
+      const textNodes = getTextNodes(doc.body)
+        .map((n) => n.nodeValue.trim())
+        .filter((t) => t.length >= 2 && t.length <= 50)
+      
+      for (const text of textNodes) {
+        // Check if it looks like a name (starts with capital, has letters, not email/phone/url)
+        if (/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/.test(text) && 
+            !emailRegex.test(text) && 
+            !phoneRegex.test(text) &&
+            !text.match(/https?:\/\/|www\./i)) {
+          fields.push({
+            key: "name",
+            label: "Name",
+            originalValue: text,
+            suggestedValue: text,
+            enabled: true
+          })
+          nameFound = true
+          break
+        }
+      }
+    }
+
+    // 4) Position - look for position/title patterns
+    const positionPatterns = [
+      /(?:position|job\s*position|title|job\s*title|role)[\s:]*([^\n<]+)/i,
+      /this\s*is\s*a\s*title/i,
+      /your\s*position/i,
+      /your\s*title/i
     ]
-
-    placeholders.forEach(({ pattern, label, key }) => {
-      if (pattern.test(html)) {
-        const match = html.match(new RegExp(pattern.source, 'i'))
-        if (match) {
-          addField(key, label, match[0], "")
+    
+    for (const pattern of positionPatterns) {
+      const match = html.match(pattern)
+      if (match) {
+        const positionValue = match[1] ? match[1].trim() : match[0].trim()
+        if (positionValue && positionValue.length > 0) {
+          fields.push({
+            key: "position",
+            label: "Position",
+            originalValue: positionValue,
+            suggestedValue: positionValue === match[0] ? "" : positionValue,
+            enabled: true
+          })
+          break
         }
       }
-    })
+    }
 
-    // 7) Extract meaningful text nodes (over-detect)
-    const emailRegex2 = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i
-    const phoneRegex2 = /\+?\d[\d\s().-]{7,}\d/
-    const urlRegex2 = /https?:\/\/|www\./i
-
-    const cleaned = textNodes.filter((t) => {
-      // Filter out emails, phones, URLs, and very short text
-      if (t.length < 2) return false
-      if (emailRegex2.test(t)) return false
-      if (phoneRegex2.test(t)) return false
-      if (urlRegex2.test(t)) return false
-      // Filter out common HTML artifacts
-      if (/^[\s\-_|•]+$/.test(t)) return false
-      return true
-    })
-
-    // Add first few meaningful text nodes as potential fields
-    // Prioritize longer text (likely names/titles)
-    const sortedByLength = [...cleaned].sort((a, b) => b.length - a.length)
-    const topTextNodes = sortedByLength.slice(0, 10) // Take top 10 longest
-
-    topTextNodes.forEach((text, index) => {
-      // Skip if already detected as a specific field
-      const alreadyDetected = fields.some(f => f.originalValue === text)
-      if (!alreadyDetected) {
-        // Try to infer label based on position and content
-        let label = "Text content"
-        if (index === 0 && text.length > 3 && !fields.some(f => f.key === "name" || f.key === "fullName")) {
-          label = "Name (detected)"
-        } else if (index === 1 && text.length > 3 && !fields.some(f => f.key === "title" || f.key === "position")) {
-          label = "Title (detected)"
-        } else {
-          label = `Text ${index + 1}`
-        }
-        addField(`text_${index}`, label, text)
-      }
-    })
-
-    // 8) Also check for text that looks like names (capitalized words)
-    cleaned.forEach((text, index) => {
-      if (text.length >= 3 && text.length <= 50) {
-        // Check if it looks like a name (starts with capital, has letters)
-        if (/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/.test(text)) {
-          const alreadyDetected = fields.some(f => f.originalValue === text)
-          if (!alreadyDetected && !fields.some(f => f.key === "name" || f.key === "fullName")) {
-            addField("name_detected", "Name (detected)", text)
+    // 5) Social Links - detect social media links
+    const socialDomains = [
+      'linkedin.com', 'twitter.com', 'x.com', 'facebook.com', 'instagram.com',
+      'youtube.com', 'github.com', 'behance.net', 'dribbble.com', 'pinterest.com'
+    ]
+    
+    if (doc) {
+      const links = doc.querySelectorAll('a[href]')
+      const socialLinks = []
+      
+      links.forEach((link) => {
+        const href = link.getAttribute('href')
+        if (href && href.startsWith('http')) {
+          const url = new URL(href)
+          const domain = url.hostname.replace('www.', '')
+          if (socialDomains.some(social => domain.includes(social))) {
+            socialLinks.push({
+              href: href,
+              text: link.textContent.trim() || href
+            })
           }
         }
+      })
+      
+      if (socialLinks.length > 0) {
+        // Combine all social links into one field
+        const allLinks = socialLinks.map(l => l.href).join(', ')
+        fields.push({
+          key: "socialLinks",
+          label: "Social Links",
+          originalValue: allLinks,
+          suggestedValue: allLinks,
+          enabled: true,
+          // Store individual links for replacement
+          replacementTargets: socialLinks.map(l => l.href)
+        })
       }
-    })
+    }
 
-    // Sort fields: prioritize specific fields (email, phone, name, title) first
-    const priorityOrder = ['email', 'phone', 'name', 'fullName', 'title', 'position', 'company']
-    fields.sort((a, b) => {
-      const aPriority = priorityOrder.findIndex(p => a.key.startsWith(p))
-      const bPriority = priorityOrder.findIndex(p => b.key.startsWith(p))
-      if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority
-      if (aPriority !== -1) return -1
-      if (bPriority !== -1) return 1
-      return 0
-    })
+    // 6) Address - look for address patterns
+    const addressPatterns = [
+      /(?:address|location)[\s:]*([^\n<]+)/i
+    ]
+    
+    for (const pattern of addressPatterns) {
+      const match = html.match(pattern)
+      if (match && match[1]) {
+        const addressValue = match[1].trim()
+        if (addressValue && addressValue.length > 0) {
+          fields.push({
+            key: "address",
+            label: "Address",
+            originalValue: addressValue,
+            suggestedValue: addressValue,
+            enabled: true
+          })
+          break
+        }
+      }
+    }
 
     return fields
   }
@@ -268,9 +334,9 @@ function App() {
 
     if (fields.length === 0) {
       setDetectStatus("<strong>No obvious fields found.</strong> You can still manually replace values later by editing the HTML.")
-      setNoFieldsMsg("Tip: Use clear placeholder text like 'Full name', 'Job title', etc. for easier detection.")
+      setNoFieldsMsg("Tip: Use clear placeholder text like 'Full name', 'Position', etc. for easier detection.")
     } else {
-      setDetectStatus(`<strong>Found ${fields.length} potential field(s).</strong> Toggle fields on/off and edit values below, then click Generate.`)
+      setDetectStatus(`<strong>Found ${fields.length} field(s).</strong> Toggle fields on/off and edit values below, then click Generate.`)
       setIsGenerateDisabled(false)
     }
   }
@@ -307,9 +373,38 @@ function App() {
       const newValue = fieldValues[field.key] || field.originalValue
       if (!field.originalValue) return
       
-      // Use simple string replacement for exact matches
-      // This handles HTML entities and special characters naturally
-      updatedHtml = updatedHtml.split(field.originalValue).join(newValue)
+      // Handle fields with replacementTargets (email, phone, social links)
+      if (field.replacementTargets && Array.isArray(field.replacementTargets)) {
+        // Replace all targets with the new value
+        field.replacementTargets.forEach((target) => {
+          updatedHtml = updatedHtml.split(target).join(newValue)
+        })
+        
+        // For email: replace any remaining mailto: links with the original email
+        if (field.key === "email") {
+          // Replace mailto: links that contain the original email
+          const emailRegex = new RegExp(`mailto:${field.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi')
+          updatedHtml = updatedHtml.replace(emailRegex, `mailto:${newValue}`)
+        }
+        
+        // For phone: replace any remaining tel: links with the original phone
+        if (field.key === "phone") {
+          // Normalize phone for matching (remove formatting)
+          const normalizePhone = (p) => p.replace(/[\s().-]/g, '')
+          const normalizedOriginal = normalizePhone(field.originalValue)
+          
+          // Replace tel: links that match the original phone
+          updatedHtml = updatedHtml.replace(/tel:([\d\s().+-]+)/gi, (match, telValue) => {
+            if (normalizePhone(telValue.trim()) === normalizedOriginal) {
+              return `tel:${newValue}`
+            }
+            return match
+          })
+        }
+      } else {
+        // Standard replacement for other fields
+        updatedHtml = updatedHtml.split(field.originalValue).join(newValue)
+      }
     })
 
     setOutputHtml(updatedHtml)
