@@ -281,16 +281,19 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <div className="min-h-screen bg-white text-gray-900">
       <header className="relative flex h-[68px] items-center justify-between px-6 bg-white border-b border-gray-200">
-        <img 
-          className="h-9 w-auto" 
-          src="https://cdn.prod.website-files.com/6826f1bc2fc92556aa2497cc/69392412e6b34a38bb174dc6_Signature%20Tool%20Logo.png" 
-          alt="Signature Tool logo" 
-        />
+        <div className="flex items-center gap-3">
+          <img 
+            className="h-9 w-auto" 
+            src="https://cdn.prod.website-files.com/6826f1bc2fc92556aa2497cc/69392412e6b34a38bb174dc6_Signature%20Tool%20Logo.png" 
+            alt="Signature Tool logo" 
+          />
+          <span className="text-lg font-semibold text-gray-900">Signature Tool</span>
+        </div>
         
         {/* Desktop Navigation */}
-        <NavigationMenu className="hidden md:flex ml-16">
+        <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink 
@@ -366,23 +369,34 @@ function App() {
         )}
       </header>
 
-      <div className="max-w-5xl mx-auto mt-6 p-5 sm:p-6">
-        <Card className="shadow-lg">
-          <CardContent className="pt-6">
-            <div className="mb-6">
-              <div className="hivory-h5 mb-2">1. Paste your HTML signature</div>
-              <Label htmlFor="signatureInput" className="hivory-paragraph-small font-semibold block mb-1">
-                Signature HTML
-              </Label>
-              <Textarea 
-                id="signatureInput"
-                value={signatureHtml}
-                onChange={(e) => setSignatureHtml(e.target.value)}
-                className="w-full min-h-[160px] font-mono text-sm resize-y" 
-                placeholder="Paste your HTML email signature here..."
-              />
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        {/* Main Heading */}
+        <div className="text-center mb-12">
+          <h1 className="hivory-h1 mb-4">Create and edit your email signatures</h1>
+          <p className="hivory-paragraph-medium text-gray-600">
+            Paste your HTML email signature below to detect and edit fields
+          </p>
+        </div>
 
-              <div className="flex flex-wrap gap-2 mt-3">
+        {/* Step 1: Paste your HTML signature */}
+        <div className="mb-12">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm">
+              1
+            </div>
+            <div className="flex-1">
+              <h2 className="hivory-h5 mb-4">Paste your HTML email signature</h2>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <Textarea 
+                  id="signatureInput"
+                  value={signatureHtml}
+                  onChange={(e) => setSignatureHtml(e.target.value)}
+                  className="w-full min-h-[160px] font-mono text-sm resize-y border-0 focus-visible:ring-0 p-0" 
+                  placeholder="Paste your HTML email signature here..."
+                />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
                 <Button 
                   onClick={handleDetect}
                   className="rounded-full"
@@ -400,50 +414,68 @@ function App() {
               </div>
               {detectStatus && (
                 <div 
-                  className="hivory-paragraph-small text-gray-500 mt-2"
+                  className="hivory-paragraph-small text-gray-500 mt-3"
                   dangerouslySetInnerHTML={{ __html: detectStatus }}
                 />
               )}
             </div>
+          </div>
+        </div>
 
-            <div className="mb-6">
-              <div className="flex items-center justify-between gap-2">
-                <div className="hivory-h5 flex items-center">
-                  2. Edit the detected fields
-                  <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 uppercase tracking-[0.03em] ml-1">
+        {/* Step 2: Edit the detected fields */}
+        <div className="mb-12">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm">
+              2
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="hivory-h5">Edit the detected fields</h2>
+                {detectedFields.length > 0 && (
+                  <span className="inline-block text-[10px] px-2 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold uppercase tracking-[0.03em]">
                     Auto-detected
                   </span>
+                )}
+              </div>
+              {detectedFields.length > 0 ? (
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {detectedFields.map((field) => (
+                      <div key={field.key} className="space-y-2">
+                        <Label className="block text-sm font-medium text-gray-700">{field.label}</Label>
+                        <input 
+                          type="text" 
+                          value={fieldValues[field.key] || ''}
+                          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                          className="w-full text-sm px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black" 
+                        />
+                        <small className="block text-xs text-gray-500">
+                          Original: <code className="font-mono">{escapeHtml(field.originalValue || "")}</code>
+                        </small>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <span className="hivory-paragraph-small text-gray-500">
-                  You can change the values before generating.
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                {detectedFields.map((field) => (
-                  <Card key={field.key} className="bg-gray-50">
-                    <CardContent className="p-3 space-y-1">
-                      <Label className="block text-xs text-gray-500">{field.label}</Label>
-                      <input 
-                        type="text" 
-                        value={fieldValues[field.key] || ''}
-                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                        className="w-full text-sm px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                      />
-                      <small className="block text-xs text-gray-500">
-                        Original: <code className="font-mono text-[11px]">{escapeHtml(field.originalValue || "")}</code>
-                      </small>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {noFieldsMsg && (
-                <div className="hivory-paragraph-small text-gray-500 mt-1">{noFieldsMsg}</div>
+              ) : (
+                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                  <p className="hivory-paragraph-small text-gray-500">
+                    {noFieldsMsg || "No fields detected yet. Paste your HTML signature and click 'Find fields'."}
+                  </p>
+                </div>
               )}
             </div>
+          </div>
+        </div>
 
-            <div className="mb-2">
-              <div className="hivory-h5 mb-2">3. Generate and preview updated signature</div>
-              <div className="flex flex-wrap gap-2">
+        {/* Step 3: Generate and preview updated signature */}
+        <div>
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm">
+              3
+            </div>
+            <div className="flex-1">
+              <h2 className="hivory-h5 mb-4">Generate and preview updated signature</h2>
+              <div className="flex flex-wrap gap-2 mb-4">
                 <Button 
                   onClick={handleGenerate}
                   disabled={isGenerateDisabled}
@@ -462,40 +494,34 @@ function App() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4 mt-4">
-                <div className="min-w-0">
-                  <Label htmlFor="outputHtml" className="hivory-paragraph-small font-semibold block mb-1">
+              <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <Label htmlFor="outputHtml" className="block text-sm font-medium text-gray-700 mb-2">
                     Updated HTML
                   </Label>
                   <Textarea 
                     id="outputHtml"
                     value={outputHtml}
                     readOnly
-                    className="w-full min-h-[160px] font-mono text-sm resize-y" 
+                    className="w-full min-h-[160px] font-mono text-sm resize-y border-0 focus-visible:ring-0 p-0" 
                     placeholder="Your updated HTML will appear here..."
                   />
-                  <div className="hivory-paragraph-small text-gray-500 mt-1">
-                    Copy this HTML or use the button above to copy it with rich formatting.
-                  </div>
                 </div>
 
-                <div className="min-w-0">
-                  <Label className="hivory-paragraph-small font-semibold block mb-1">Preview</Label>
-                  <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-2">Preview</Label>
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                     <iframe 
                       ref={previewFrameRef}
                       title="Signature preview" 
                       className="w-full border-0 bg-white min-h-[150px]"
                     />
                   </div>
-                  <div className="hivory-paragraph-small text-gray-500 mt-1">
-                    This is how your signature will look when pasted into your email client.
-                  </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
