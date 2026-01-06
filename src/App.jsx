@@ -505,9 +505,9 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="w-full px-6 py-4">
+      <footer className="w-full px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs" style={{ color: '#6B7C75' }}>
+          <p className="text-xs text-center" style={{ color: '#6B7C75' }}>
             Copyright © 2026 - All rights reserved | A product by{' '}
             <a 
               href="https://www.hivory.io" 
