@@ -503,6 +503,24 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full px-6 py-4">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-xs" style={{ color: '#6B7C75' }}>
+            Copyright © 2026 - All rights reserved | A product by{' '}
+            <a 
+              href="https://www.hivory.io" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:underline"
+              style={{ color: '#6B7C75' }}
+            >
+              Hivory
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
