@@ -341,7 +341,29 @@ function App() {
       }
 
       const data = await response.json()
-      const fields = data.fields || []
+      let fields = data.fields || []
+
+      // Ensure all fields have unique keys (handle duplicates)
+      const keyCounts = {}
+      fields = fields.map((field, index) => {
+        const baseKey = field.key || `field_${index}`
+        let uniqueKey = baseKey
+        let counter = 1
+        
+        // If key already exists, make it unique by appending a number
+        while (keyCounts[uniqueKey]) {
+          uniqueKey = `${baseKey}_${counter}`
+          counter++
+        }
+        keyCounts[uniqueKey] = true
+        
+        return {
+          ...field,
+          key: uniqueKey,
+          // Update label to show it's a duplicate if needed
+          label: counter > 1 ? `${field.label || baseKey} ${counter - 1}` : (field.label || baseKey)
+        }
+      })
 
       setDetectedFields(fields)
       
@@ -430,6 +452,14 @@ function App() {
             }
             return match
           })
+        }
+        
+        // For social links: ensure href attributes are updated
+        if (field.key && (field.key.includes('linkedin') || field.key.includes('twitter') || field.key.includes('facebook') || field.key.includes('instagram') || field.key.includes('youtube') || field.key.includes('github') || field.key.includes('social'))) {
+          // Replace href attributes that contain the original URL
+          const escapedOriginal = field.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const hrefRegex = new RegExp(`href=["']${escapedOriginal}["']`, 'gi')
+          updatedHtml = updatedHtml.replace(hrefRegex, `href="${newValue}"`)
         }
       } else {
         // Standard replacement for other fields

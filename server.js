@@ -39,7 +39,7 @@ Identify the following types of fields:
 3. **Email** - Email address (both displayed text and mailto: links)
 4. **Phone** - Phone number (both displayed text and tel: links)
 5. **Address** - Physical address or location
-6. **Social Links** - Social media profile URLs (LinkedIn, Twitter, Facebook, Instagram, etc.)
+6. **Social Links** - Social media profile URLs (LinkedIn, Twitter/X, Facebook, Instagram, YouTube, GitHub, Behance, Dribbble, Pinterest, TikTok, etc.). Each social link should be a SEPARATE field.
 7. **Company** - Company name
 8. **Website** - Company or personal website URL
 
@@ -51,9 +51,11 @@ For each field you find, provide:
 
 IMPORTANT:
 - For email: Include both the email text AND any mailto: links in replacementTargets array
-- For phone: Include both the phone text AND any tel: links in replacementTargets array
-- For social links: Combine all social media links into one "socialLinks" field with replacementTargets array containing all URLs
+- For phone: If there are multiple phone numbers (e.g., mobile and office), create SEPARATE fields with unique keys like "phone", "phone2", "mobile", "office", etc. Each phone field should include both the phone text AND any tel: links in its replacementTargets array
+- For social links: Each social media link should be a SEPARATE field with a unique key. Use descriptive keys like "linkedin", "twitter", "facebook", "instagram", "youtube", "github", etc. If there are multiple of the same type, use "linkedin", "linkedin2", etc. Each social link field should include the full URL in originalValue and replacementTargets array (include the exact URL as it appears in href attributes)
 - Extract the exact text/values as they appear in the HTML for accurate replacement
+- Each field MUST have a unique "key" value - if you find multiple instances of the same field type, use unique keys (e.g., "phone", "phone2", "email", "email2", "linkedin", "linkedin2")
+- Look for ALL links in the HTML, including those in <a> tags with href attributes, and identify which ones are social media links
 - Return a JSON object with a "fields" property containing an array
 
 Here is the HTML to analyze:
@@ -76,6 +78,22 @@ Return a JSON object in this exact format:
       "suggestedValue": "john@example.com",
       "enabled": true,
       "replacementTargets": ["john@example.com", "mailto:john@example.com"]
+    },
+    {
+      "key": "linkedin",
+      "label": "LinkedIn",
+      "originalValue": "https://linkedin.com/in/johndoe",
+      "suggestedValue": "https://linkedin.com/in/johndoe",
+      "enabled": true,
+      "replacementTargets": ["https://linkedin.com/in/johndoe"]
+    },
+    {
+      "key": "twitter",
+      "label": "Twitter",
+      "originalValue": "https://twitter.com/johndoe",
+      "suggestedValue": "https://twitter.com/johndoe",
+      "enabled": true,
+      "replacementTargets": ["https://twitter.com/johndoe"]
     }
   ]
 }`;
