@@ -24,6 +24,7 @@ function App() {
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true)
   const [isCopyDisabled, setIsCopyDisabled] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isDetecting, setIsDetecting] = useState(false)
   const previewFrameRef = useRef(null)
 
   const resetUI = () => {
@@ -312,7 +313,7 @@ function App() {
     return fields
   }
 
-  const handleDetect = () => {
+  const handleDetect = async () => {
     const html = signatureHtml.trim()
     resetUI()
 
@@ -321,23 +322,52 @@ function App() {
       return
     }
 
+    setIsDetecting(true)
+    setDetectStatus("<strong>Analyzing signature with AI...</strong> This may take a few seconds.")
     setOriginalHtml(html)
-    const fields = detectFieldsFromHtml(html)
-    setDetectedFields(fields)
-    
-    // Initialize field values
-    const initialValues = {}
-    fields.forEach(field => {
-      initialValues[field.key] = field.suggestedValue || field.originalValue || ""
-    })
-    setFieldValues(initialValues)
 
-    if (fields.length === 0) {
-      setDetectStatus("<strong>No obvious fields found.</strong> You can still manually replace values later by editing the HTML.")
-      setNoFieldsMsg("Tip: Use clear placeholder text like 'Full name', 'Position', etc. for easier detection.")
-    } else {
-      setDetectStatus(`<strong>Found ${fields.length} field(s).</strong> Toggle fields on/off and edit values below, then click Generate.`)
-      setIsGenerateDisabled(false)
+    try {
+      const response = await fetch('/api/detect-fields', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || errorData.details || `Server error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const fields = data.fields || []
+
+      setDetectedFields(fields)
+      
+      // Initialize field values
+      const initialValues = {}
+      fields.forEach(field => {
+        initialValues[field.key] = field.suggestedValue || field.originalValue || ""
+      })
+      setFieldValues(initialValues)
+
+      if (fields.length === 0) {
+        setDetectStatus("<strong>No fields detected.</strong> The AI couldn't find any editable fields. You can still manually replace values later by editing the HTML.")
+        setNoFieldsMsg("Tip: Make sure your signature contains clear fields like name, email, phone, position, etc.")
+      } else {
+        setDetectStatus(`<strong>Found ${fields.length} field(s) using AI.</strong> Toggle fields on/off and edit values below, then click Generate.`)
+        setIsGenerateDisabled(false)
+      }
+    } catch (error) {
+      console.error('Error detecting fields:', error)
+      setDetectStatus(`<strong>Error detecting fields.</strong> ${error.message || 'Please try again or check your connection.'}`)
+      setNoFieldsMsg("If this persists, you can still manually edit the HTML.")
+      toast.error("Detection Failed", {
+        description: error.message || "Failed to detect fields. Please try again."
+      })
+    } finally {
+      setIsDetecting(false)
     }
   }
 
@@ -599,8 +629,9 @@ function App() {
                 <Button 
                   onClick={handleDetect}
                   className="rounded-full"
+                  disabled={isDetecting}
                 >
-                  Find fields
+                  {isDetecting ? 'Detecting...' : 'Find fields'}
                 </Button>
                 <Button 
                   onClick={handleClear}
