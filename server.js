@@ -181,20 +181,36 @@ app.post('/api/generate-signature', async (req, res) => {
     }
     if (logo) informationString += `Logo URL: ${logo}\n`;
 
-    // Base prompt
-    let prompt = `Generate a world-class HTML email signature. The signature should be professional, modern, and visually appealing. Use inline CSS for styling to ensure compatibility with email clients.
+    // Enhanced prompt with specific design guidance
+    let prompt = `You are an award-winning email signature designer. Create a stunning, modern HTML email signature that stands out while remaining professional.
 
-Requirements:
-- Use table-based layout for maximum email client compatibility
-- Include all provided information in an organized, readable format
-- Use inline CSS styles (no external stylesheets)
-- Make it responsive and mobile-friendly
-- Use appropriate colors, fonts, and spacing
-- Include proper mailto: links for email addresses
+DESIGN REQUIREMENTS:
+- Use table-based layout with nested tables for maximum email client compatibility (Gmail, Outlook, Apple Mail, etc.)
+- Apply modern design principles: visual hierarchy, balanced spacing, thoughtful typography
+- Use a color scheme that's professional yet distinctive - consider subtle gradients, accent colors, or brand colors
+- Typography: Use web-safe fonts (Arial, Helvetica, Georgia, Times New Roman) with appropriate font sizes (name: 16-20px, details: 11-13px)
+- Spacing: Generous padding (10-15px) between elements, proper line-height (1.4-1.6)
+- Visual elements: Consider subtle dividers, icons for contact methods, or decorative accents
+- Social media: Use icon-based links with hover effects (if possible) or styled text links
+- Logo integration: If logo provided, make it prominent but balanced with text content
+- Mobile responsiveness: Ensure it looks great on mobile devices with appropriate font scaling
+
+DESIGN STYLES TO CONSIDER:
+- Modern minimalist: Clean lines, ample white space, subtle colors
+- Bold & colorful: Vibrant accents, strong typography, eye-catching layout
+- Corporate professional: Traditional layout with refined styling
+- Creative/designer: Unique layouts, creative typography, artistic elements
+- Tech/startup: Modern, sleek, with tech-forward aesthetics
+
+TECHNICAL REQUIREMENTS:
+- All CSS must be inline (no external stylesheets)
+- Use table-based layout for compatibility
+- Include proper mailto: links for emails
 - Include proper tel: links for phone numbers
-- Make social media links clickable if provided
-- Include logo if provided
-- Ensure the design is clean and professional
+- Make all social links clickable with proper href attributes
+- Use web-safe fonts or fallback fonts
+- Ensure proper contrast ratios for accessibility
+- Test for dark mode compatibility where possible
 
 User Information:
 ${informationString}`;
@@ -204,21 +220,21 @@ ${informationString}`;
       prompt += `\n\nAdditional Instructions: ${userPrompt.trim()}`;
     }
 
-    prompt += `\n\nReturn ONLY the HTML code for the email signature. Do not include any explanations, markdown formatting, or code blocks. Just the raw HTML.`;
+    prompt += `\n\nGenerate a unique, visually striking email signature that goes beyond basic templates. Make it memorable and professional. Return ONLY the HTML code - no explanations, no markdown, just clean HTML.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o', // Upgraded from gpt-4o-mini for better quality
       messages: [
         {
           role: 'system',
-          content: 'You are an expert HTML email signature designer. Generate professional, world-class HTML email signatures that work across all major email clients. Always return clean HTML code without markdown formatting or code blocks.'
+          content: 'You are an expert HTML email signature designer with years of experience creating award-winning email signatures. You understand modern design trends, email client limitations, and how to create visually stunning yet functional signatures. Always return clean HTML code without markdown formatting or code blocks.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.7,
+      temperature: 0.8, // Increased from 0.7 for more creative variation
     });
 
     let html = completion.choices[0].message.content.trim();
