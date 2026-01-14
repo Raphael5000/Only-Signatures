@@ -157,6 +157,90 @@ Return a JSON object in this exact format:
   }
 });
 
+// API endpoint for generating email signatures
+app.post('/api/generate-signature', async (req, res) => {
+  try {
+    const { name, position, contactNumber, emailAddress, website, socialLinks, logo, userPrompt } = req.body;
+
+    if (!name || !emailAddress) {
+      return res.status(400).json({ error: 'Name and email address are required' });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key is not configured' });
+    }
+
+    // Build the information string
+    let informationString = `Name: ${name}\n`;
+    if (position) informationString += `Position: ${position}\n`;
+    if (contactNumber) informationString += `Contact Number: ${contactNumber}\n`;
+    informationString += `Email Address: ${emailAddress}\n`;
+    if (website) informationString += `Website: ${website}\n`;
+    if (socialLinks) {
+      informationString += `Social Links:\n${socialLinks}\n`;
+    }
+    if (logo) informationString += `Logo URL: ${logo}\n`;
+
+    // Base prompt
+    let prompt = `Generate a world-class HTML email signature. The signature should be professional, modern, and visually appealing. Use inline CSS for styling to ensure compatibility with email clients.
+
+Requirements:
+- Use table-based layout for maximum email client compatibility
+- Include all provided information in an organized, readable format
+- Use inline CSS styles (no external stylesheets)
+- Make it responsive and mobile-friendly
+- Use appropriate colors, fonts, and spacing
+- Include proper mailto: links for email addresses
+- Include proper tel: links for phone numbers
+- Make social media links clickable if provided
+- Include logo if provided
+- Ensure the design is clean and professional
+
+User Information:
+${informationString}`;
+
+    // Add user's additional prompt if provided
+    if (userPrompt && userPrompt.trim()) {
+      prompt += `\n\nAdditional Instructions: ${userPrompt.trim()}`;
+    }
+
+    prompt += `\n\nReturn ONLY the HTML code for the email signature. Do not include any explanations, markdown formatting, or code blocks. Just the raw HTML.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert HTML email signature designer. Generate professional, world-class HTML email signatures that work across all major email clients. Always return clean HTML code without markdown formatting or code blocks.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+    });
+
+    let html = completion.choices[0].message.content.trim();
+
+    // Clean up the response - remove markdown code blocks if present
+    html = html.replace(/^```html\n?/i, '').replace(/^```\n?/i, '').replace(/\n?```$/i, '').trim();
+
+    // Validate that we got HTML
+    if (!html || html.length < 10) {
+      throw new Error('Generated HTML is too short or invalid');
+    }
+
+    res.json({ html, signature: html });
+  } catch (error) {
+    console.error('Error generating signature:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate signature',
+      details: error.message 
+    });
+  }
+});
+
 // Serve static files from dist directory with correct MIME types
 app.use(express.static(path.join(__dirname, 'dist'), {
   setHeaders: (res, filePath) => {
