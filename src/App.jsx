@@ -548,8 +548,8 @@ function App() {
         <div className="flex items-center gap-3">
           <img 
             className="h-9 w-auto" 
-            src="https://cdn.prod.website-files.com/6826f1bc2fc92556aa2497cc/69392412e6b34a38bb174dc6_Signature%20Tool%20Logo.png" 
-            alt="Signature Tool logo" 
+            src="/Only Signautes Logo.svg" 
+            alt="Only Signatures logo" 
           />
         </div>
         
