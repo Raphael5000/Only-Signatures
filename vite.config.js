@@ -32,6 +32,12 @@ export default defineConfig({
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
   },
 })
 
