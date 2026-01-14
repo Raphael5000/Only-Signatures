@@ -2,6 +2,8 @@
 const express = require('express');
 const path = require('path');
 const OpenAI = require('openai');
+const https = require('https');
+const http = require('http');
 
 const app = express();
 // CodeCapsules uses PORT environment variable, fallback to 3000 for local
@@ -13,6 +15,121 @@ const HOST = '0.0.0.0';
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
+// Helper function to get image dimensions from URL
+async function getImageDimensions(url) {
+  return new Promise((resolve, reject) => {
+    if (!url || typeof url !== 'string') {
+      resolve(null);
+      return;
+    }
+
+    try {
+      const urlObj = new URL(url);
+      const client = urlObj.protocol === 'https:' ? https : http;
+      
+      const request = client.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          resolve(null);
+          return;
+        }
+
+        const chunks = [];
+        let totalBytes = 0;
+        const maxBytes = 1024 * 10; // Read first 10KB which should be enough for image headers
+
+        response.on('data', (chunk) => {
+          chunks.push(chunk);
+          totalBytes += chunk.length;
+          if (totalBytes >= maxBytes) {
+            response.destroy();
+            parseImageDimensions(Buffer.concat(chunks), resolve, reject);
+          }
+        });
+
+        response.on('end', () => {
+          if (chunks.length > 0) {
+            parseImageDimensions(Buffer.concat(chunks), resolve, reject);
+          } else {
+            resolve(null);
+          }
+        });
+      });
+
+      request.on('error', () => {
+        resolve(null);
+      });
+
+      request.setTimeout(5000, () => {
+        request.destroy();
+        resolve(null);
+      });
+    } catch (error) {
+      resolve(null);
+    }
+  });
+}
+
+// Parse image dimensions from buffer (supports PNG, JPEG, GIF)
+function parseImageDimensions(buffer, resolve, reject) {
+  try {
+    // PNG: First 8 bytes are signature, then IHDR chunk with width (4 bytes) and height (4 bytes) at offset 16
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+      const width = buffer.readUInt32BE(16);
+      const height = buffer.readUInt32BE(20);
+      resolve({ width, height });
+      return;
+    }
+
+    // JPEG: Look for SOF markers (0xFFC0, 0xFFC1, 0xFFC2, etc.)
+    let i = 0;
+    while (i < buffer.length - 8) {
+      if (buffer[i] === 0xFF && buffer[i + 1] >= 0xC0 && buffer[i + 1] <= 0xC3) {
+        const height = buffer.readUInt16BE(i + 5);
+        const width = buffer.readUInt16BE(i + 7);
+        resolve({ width, height });
+        return;
+      }
+      i++;
+    }
+
+    // GIF: Width and height at offset 6 (2 bytes each, little-endian)
+    if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
+      const width = buffer.readUInt16LE(6);
+      const height = buffer.readUInt16LE(8);
+      resolve({ width, height });
+      return;
+    }
+
+    // SVG: Try to parse from XML (simplified)
+    const svgString = buffer.toString('utf8', 0, Math.min(buffer.length, 2000));
+    const widthMatch = svgString.match(/width=["'](\d+)/i);
+    const heightMatch = svgString.match(/height=["'](\d+)/i);
+    const viewBoxMatch = svgString.match(/viewBox=["']\d+\s+\d+\s+(\d+)\s+(\d+)/i);
+    
+    if (viewBoxMatch) {
+      const width = parseInt(viewBoxMatch[1]);
+      const height = parseInt(viewBoxMatch[2]);
+      if (width && height) {
+        resolve({ width, height });
+        return;
+      }
+    }
+    
+    if (widthMatch && heightMatch) {
+      const width = parseInt(widthMatch[1]);
+      const height = parseInt(heightMatch[1]);
+      if (width && height) {
+        resolve({ width, height });
+        return;
+      }
+    }
+
+    resolve(null);
+  } catch (error) {
+    resolve(null);
+  }
+}
 
 // Middleware to parse JSON bodies
 app.use(express.json({ limit: '10mb' }));
@@ -170,6 +287,20 @@ app.post('/api/generate-signature', async (req, res) => {
       return res.status(500).json({ error: 'OpenAI API key is not configured' });
     }
 
+    // Detect logo dimensions if logo is provided
+    let logoAspectRatio = null;
+    let logoDimensions = null;
+    if (logo) {
+      try {
+        logoDimensions = await getImageDimensions(logo);
+        if (logoDimensions && logoDimensions.width && logoDimensions.height) {
+          logoAspectRatio = logoDimensions.width / logoDimensions.height;
+        }
+      } catch (error) {
+        console.warn('Could not detect logo dimensions:', error.message);
+      }
+    }
+
     // Build the information string
     let informationString = `Name: ${name}\n`;
     if (position) informationString += `Position: ${position}\n`;
@@ -179,7 +310,12 @@ app.post('/api/generate-signature', async (req, res) => {
     if (socialLinks) {
       informationString += `Social Links:\n${socialLinks}\n`;
     }
-    if (logo) informationString += `Logo URL: ${logo}\n`;
+    if (logo) {
+      informationString += `Logo URL: ${logo}\n`;
+      if (logoDimensions) {
+        informationString += `Logo Dimensions: ${logoDimensions.width}x${logoDimensions.height}px (aspect ratio: ${logoAspectRatio.toFixed(2)})\n`;
+      }
+    }
 
     // Enhanced prompt with specific design guidance
     let prompt = `You are an award-winning email signature designer. Create a stunning, modern HTML email signature that stands out while remaining professional.
@@ -192,8 +328,24 @@ DESIGN REQUIREMENTS:
 - Spacing: Generous padding (10-15px) between elements, proper line-height (1.4-1.6)
 - Visual elements: Consider subtle dividers, icons for contact methods, or decorative accents
 - Social media: Use icon-based links with hover effects (if possible) or styled text links
-- Logo integration: If logo provided, make it prominent but balanced with text content
 - Mobile responsiveness: Ensure it looks great on mobile devices with appropriate font scaling
+
+CRITICAL LOGO PLACEMENT RULES (MUST FOLLOW):
+${logo ? `- Logo is provided: ${logo}
+${logoDimensions ? `- Logo dimensions: ${logoDimensions.width}x${logoDimensions.height}px (aspect ratio: ${logoAspectRatio.toFixed(2)})
+- **HORIZONTAL LOGO (width > height, aspect ratio > 1.2)**: 
+  * MUST be placed in a ROW layout (horizontally)
+  * MUST be positioned BELOW the position/title text, on its own row
+  * The logo should span horizontally, typically 200-300px wide
+  * Structure: Name and Position on top row, then Logo on second row, then contact info below
+- **SQUARE OR VERTICAL LOGO (aspect ratio <= 1.2)**: 
+  * CAN be placed NEXT TO the text content in a column layout
+  * Logo should be on the left or right side, with text content beside it
+  * Typical size: 60-100px width/height for square logos
+  * Structure: Logo and text side-by-side in a table row
+${logoAspectRatio > 1.2 ? `- **THIS IS A HORIZONTAL LOGO** - You MUST place it in a row below the position text, NOT next to the text.` : `- **THIS IS A SQUARE/VERTICAL LOGO** - You CAN place it next to the text content.`}` : `- Logo dimensions unknown - analyze the logo URL or filename to determine if it's horizontal or square/vertical
+- If the logo appears to be horizontal (wider than tall), place it in a ROW below the position text
+- If the logo appears to be square or vertical, you can place it NEXT TO the text content`}` : `- No logo provided`}
 
 DESIGN STYLES TO CONSIDER:
 - Modern minimalist: Clean lines, ample white space, subtle colors
