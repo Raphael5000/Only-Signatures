@@ -339,7 +339,7 @@ function Generator() {
         </div>
       </div>
       <Toaster />
-    </div>
+    </>
   )
 }
 
