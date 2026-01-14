@@ -642,11 +642,11 @@ function App() {
 
         {/* Step 1: Paste your HTML signature */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm md:mt-1">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
               1
             </div>
-            <div className="flex-1 w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <h2 className="hivory-h5 mb-4">Paste your HTML email signature</h2>
               <Textarea 
                 id="signatureInput"
@@ -684,11 +684,11 @@ function App() {
 
         {/* Step 2: Edit the detected fields */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm md:mt-1">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
               2
             </div>
-            <div className="flex-1 w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="hivory-h5">Edit the detected fields</h2>
                 {detectedFields.length > 0 && (
@@ -760,11 +760,11 @@ function App() {
 
         {/* Step 3: Generate and preview updated signature */}
         <div>
-          <div className="flex flex-col md:flex-row items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm md:mt-1">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
               3
             </div>
-            <div className="flex-1 w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <h2 className="hivory-h5 mb-4">Generate and preview updated signature</h2>
               <div className="flex flex-wrap gap-2 mb-4">
                 <Button 
