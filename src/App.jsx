@@ -9,6 +9,7 @@ import {
 import { Menu, X } from 'lucide-react'
 import Editor from './Editor'
 import Generator from './Generator'
+import MoxiiAfrica from './MoxiiAfrica'
 
 function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -48,6 +49,16 @@ function Layout({ children }) {
                 }`}
               >
                 Generator
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link
+                to="/moxii-africa"
+                className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none ${
+                  isActive('/moxii-africa') ? 'bg-accent' : ''
+                }`}
+              >
+                Moxii Africa
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -100,6 +111,17 @@ function Layout({ children }) {
               >
                 Generator
               </Link>
+              <Link
+                to="/moxii-africa"
+                className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  isActive('/moxii-africa')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-900 hover:bg-gray-100'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Moxii Africa
+              </Link>
               <a
                 href="#"
                 className="px-6 py-3 text-sm font-medium text-gray-500 opacity-50 cursor-not-allowed"
@@ -133,6 +155,14 @@ function App() {
           element={
             <Layout>
               <Generator />
+            </Layout>
+          }
+        />
+        <Route
+          path="/moxii-africa"
+          element={
+            <Layout>
+              <MoxiiAfrica />
             </Layout>
           }
         />
