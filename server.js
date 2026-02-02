@@ -411,7 +411,7 @@ ${informationString}`;
 
 // Only serve static files in production (in dev, Vite handles this)
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from dist directory with correct MIME types
+  // Serve static files from dist directory with correct MIME types and cache headers
   app.use(express.static(path.join(__dirname, 'dist'), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
@@ -419,11 +419,19 @@ if (process.env.NODE_ENV === 'production') {
       } else if (filePath.endsWith('.css')) {
         res.setHeader('Content-Type', 'text/css; charset=utf-8');
       }
+      
+      // Cache hashed assets forever (they have content hashes in filename)
+      if (filePath.includes('/assets/')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
     }
   }));
 
-  // Handle SPA routing - serve index.html for all routes
+  // Handle SPA routing - serve index.html for all routes (with no-cache to prevent stale references)
   app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
