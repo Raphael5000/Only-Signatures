@@ -62,7 +62,7 @@ function Layout({ children }) {
   }
 
   return (
-    <div className="min-h-screen text-gray-900" style={{ backgroundColor: '#F7FAF9' }}>
+    <div className="min-h-screen text-gray-900 flex flex-col" style={{ backgroundColor: '#F7FAF9' }}>
       <header className="relative flex h-[68px] items-center justify-between px-6 bg-white border-b border-gray-200">
         <Link to="/" className="flex items-center gap-3">
           <img 
@@ -192,7 +192,12 @@ function Layout({ children }) {
           </div>
         )}
       </header>
-      {children}
+      <main className="flex-grow">
+        {children}
+      </main>
+      <footer className="py-4 px-6 text-center text-sm text-gray-500 border-t border-gray-200 bg-white">
+        Copyright © 2026 - All rights reserved | A product by Hivory
+      </footer>
     </div>
   )
 }
