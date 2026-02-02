@@ -10,6 +10,7 @@ import { Menu, X } from 'lucide-react'
 import Editor from './Editor'
 import Generator from './Generator'
 import MoxiiAfrica from './MoxiiAfrica'
+import Login from './Login'
 
 function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -62,12 +63,14 @@ function Layout({ children }) {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <span
-                className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50"
-                style={{ opacity: 0.5 }}
+              <Link
+                to="/login"
+                className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none ${
+                  isActive('/login') ? 'bg-accent' : ''
+                }`}
               >
-                Inspiration
-              </span>
+                Login
+              </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -122,13 +125,17 @@ function Layout({ children }) {
               >
                 Moxii Africa
               </Link>
-              <a
-                href="#"
-                className="px-6 py-3 text-sm font-medium text-gray-500 opacity-50 cursor-not-allowed"
-                onClick={(e) => e.preventDefault()}
+              <Link
+                to="/login"
+                className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  isActive('/login')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-900 hover:bg-gray-100'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                Inspiration
-              </a>
+                Login
+              </Link>
             </nav>
           </div>
         )}
@@ -163,6 +170,14 @@ function App() {
           element={
             <Layout>
               <MoxiiAfrica />
+            </Layout>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <Layout>
+              <Login />
             </Layout>
           }
         />
