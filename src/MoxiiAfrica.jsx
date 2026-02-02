@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/card'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
-import { Copy, Check, Plus, X } from 'lucide-react'
+import { Copy, Check, Plus, X, Users, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 
 // Initial employee data from the Excel file
 const initialEmployees = [
@@ -60,6 +60,7 @@ function MoxiiAfrica() {
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [copied, setCopied] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showManageEmployees, setShowManageEmployees] = useState(false)
   const [newEmployee, setNewEmployee] = useState({
     fullName: '',
     jobTitle: '',
@@ -184,6 +185,22 @@ function MoxiiAfrica() {
     })
   }
 
+  const handleDeleteEmployee = (email) => {
+    const employeeToDelete = employees.find(emp => emp.email === email)
+    if (!employeeToDelete) return
+
+    // If the deleted employee was selected, clear selection
+    if (selectedEmployee === employeeToDelete.fullName) {
+      setSelectedEmployee('')
+    }
+
+    setEmployees(employees.filter(emp => emp.email !== email))
+    
+    toast.success("Employee Removed", {
+      description: `${employeeToDelete.fullName} has been removed from the list`
+    })
+  }
+
   return (
     <>
       <div className="min-h-[calc(100vh-68px)] p-6" style={{ backgroundColor: '#F7FAF9' }}>
@@ -206,23 +223,44 @@ function MoxiiAfrica() {
                     Choose an employee to generate their personalized email signature
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => setShowAddForm(!showAddForm)}
-                  variant={showAddForm ? "outline" : "default"}
-                  size="sm"
-                >
-                  {showAddForm ? (
-                    <>
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Employee
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setShowManageEmployees(!showManageEmployees)
+                      if (showAddForm) setShowAddForm(false)
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage ({employees.length})
+                    {showManageEmployees ? (
+                      <ChevronUp className="h-4 w-4 ml-1" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 ml-1" />
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowAddForm(!showAddForm)
+                      if (showManageEmployees) setShowManageEmployees(false)
+                    }}
+                    variant={showAddForm ? "outline" : "default"}
+                    size="sm"
+                  >
+                    {showAddForm ? (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Employee
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -290,6 +328,54 @@ function MoxiiAfrica() {
                       </Button>
                     </div>
                   </form>
+                </div>
+              )}
+
+              {/* Manage Employees Section */}
+              {showManageEmployees && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h3 className="font-medium text-gray-900 mb-4">Manage Employees</h3>
+                  <div className="max-h-80 overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="text-left text-gray-500 border-b">
+                        <tr>
+                          <th className="pb-2 font-medium">Name</th>
+                          <th className="pb-2 font-medium hidden md:table-cell">Title</th>
+                          <th className="pb-2 font-medium hidden lg:table-cell">Email</th>
+                          <th className="pb-2 font-medium w-20 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {employees.map((employee) => (
+                          <tr key={employee.email} className="hover:bg-gray-100">
+                            <td className="py-2 pr-2">
+                              <div className="font-medium text-gray-900">{employee.fullName}</div>
+                              <div className="text-gray-500 md:hidden text-xs">{employee.jobTitle}</div>
+                            </td>
+                            <td className="py-2 pr-2 hidden md:table-cell text-gray-600 truncate max-w-[200px]">
+                              {employee.jobTitle}
+                            </td>
+                            <td className="py-2 pr-2 hidden lg:table-cell text-gray-600">
+                              {employee.email}
+                            </td>
+                            <td className="py-2 text-right">
+                              <Button
+                                onClick={() => handleDeleteEmployee(employee.email)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {employees.length === 0 && (
+                    <p className="text-center text-gray-500 py-4">No employees added yet.</p>
+                  )}
                 </div>
               )}
 
