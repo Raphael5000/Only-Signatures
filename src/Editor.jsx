@@ -534,7 +534,7 @@ function Editor() {
   }, [])
 
   return (
-    <div className="min-h-screen text-gray-900" style={{ backgroundColor: '#F7FAF9' }}>
+    <div className="text-gray-900" style={{ backgroundColor: '#F7FAF9' }}>
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Main Heading */}
@@ -704,24 +704,6 @@ function Editor() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="w-full px-6 py-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs text-center" style={{ color: '#6B7C75' }}>
-            Copyright © 2026 - All rights reserved | A product by{' '}
-            <a 
-              href="https://www.hivory.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:underline"
-              style={{ color: '#6B7C75' }}
-            >
-              Hivory
-            </a>
-          </p>
-        </div>
-      </footer>
       <Toaster />
     </div>
   )
