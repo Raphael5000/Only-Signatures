@@ -6,7 +6,13 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '../components/navigation-menu'
-import { Menu, X } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/dropdown-menu'
+import { Menu, X, ChevronDown, LogOut } from 'lucide-react'
 import Editor from './Editor'
 import Generator from './Generator'
 import MoxiiAfrica from './MoxiiAfrica'
@@ -35,21 +41,22 @@ function ProtectedRoute({ children }) {
 
 function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [authenticatedClient, setAuthenticatedClient] = useState(null)
   const location = useLocation()
   const navigate = useNavigate()
 
   // Check auth state on mount and when location changes
   useEffect(() => {
     const client = getAuthenticatedClient()
-    setIsLoggedIn(!!client)
+    setAuthenticatedClient(client)
   }, [location])
 
   const isActive = (path) => location.pathname === path
+  const isLoggedIn = !!authenticatedClient
 
   const handleLogout = () => {
     localStorage.removeItem('authenticatedClient')
-    setIsLoggedIn(false)
+    setAuthenticatedClient(null)
     setIsMobileMenuOpen(false)
     navigate('/login')
   }
@@ -90,12 +97,18 @@ function Layout({ children }) {
             </NavigationMenuItem>
             <NavigationMenuItem>
               {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                >
-                  Logout
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                    {authenticatedClient?.name}
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Link
                   to="/login"
@@ -150,12 +163,18 @@ function Layout({ children }) {
                 Generator
               </Link>
               {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="px-6 py-3 text-sm font-medium transition-colors text-gray-900 hover:bg-gray-100 text-left"
-                >
-                  Logout
-                </button>
+                <>
+                  <div className="px-6 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {authenticatedClient?.name}
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-6 py-3 text-sm font-medium transition-colors text-gray-900 hover:bg-gray-100 text-left flex items-center"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </button>
+                </>
               ) : (
                 <Link
                   to="/login"

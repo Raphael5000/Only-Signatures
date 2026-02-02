@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '../components/button'
+import { Input } from '../components/input'
 import { Label } from '../components/label'
 import {
   Select,
@@ -11,10 +12,10 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/card'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, Plus, X } from 'lucide-react'
 
-// Employee data from the Excel file
-const employees = [
+// Initial employee data from the Excel file
+const initialEmployees = [
   { fullName: "William Bird", jobTitle: "Director, Ashoka & Linc Fellow", cellphone: "082 887 1370", telephone: "011 788 1278", email: "williamb@mma.org.za" },
   { fullName: "Thandi Smith", jobTitle: "Head of Programmes", cellphone: "073 470 7306", telephone: "011 788 1278", email: "thandis@mma.org.za" },
   { fullName: "George Kalu", jobTitle: "HR & Capacity Development Manager", cellphone: "083 686 4699", telephone: "011 788 1278", email: "georgek@mma.org.za" },
@@ -55,8 +56,17 @@ function generateSignature(employee) {
 }
 
 function MoxiiAfrica() {
+  const [employees, setEmployees] = useState(initialEmployees)
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [copied, setCopied] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newEmployee, setNewEmployee] = useState({
+    fullName: '',
+    jobTitle: '',
+    cellphone: '',
+    telephone: '011 788 1278',
+    email: ''
+  })
   const previewFrameRef = useRef(null)
 
   const currentEmployee = employees.find(e => e.fullName === selectedEmployee)
@@ -134,6 +144,46 @@ function MoxiiAfrica() {
     }
   }
 
+  const handleAddEmployee = (e) => {
+    e.preventDefault()
+    
+    // Validate required fields
+    if (!newEmployee.fullName || !newEmployee.jobTitle || !newEmployee.telephone || !newEmployee.email) {
+      toast.error("Missing Information", {
+        description: "Please fill in all required fields"
+      })
+      return
+    }
+
+    // Check for duplicate
+    if (employees.some(emp => emp.email === newEmployee.email)) {
+      toast.error("Employee Exists", {
+        description: "An employee with this email already exists"
+      })
+      return
+    }
+
+    // Add to list
+    setEmployees([...employees, { ...newEmployee }])
+    
+    // Reset form and close
+    setNewEmployee({
+      fullName: '',
+      jobTitle: '',
+      cellphone: '',
+      telephone: '011 788 1278',
+      email: ''
+    })
+    setShowAddForm(false)
+    
+    // Auto-select the new employee
+    setSelectedEmployee(newEmployee.fullName)
+    
+    toast.success("Employee Added", {
+      description: `${newEmployee.fullName} has been added to the list`
+    })
+  }
+
   return (
     <>
       <div className="min-h-[calc(100vh-68px)] p-6" style={{ backgroundColor: '#F7FAF9' }}>
@@ -149,12 +199,100 @@ function MoxiiAfrica() {
           {/* Main Card */}
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle>Email Signature Generator</CardTitle>
-              <CardDescription>
-                Choose an employee to generate their personalized email signature
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Email Signature Generator</CardTitle>
+                  <CardDescription>
+                    Choose an employee to generate their personalized email signature
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  variant={showAddForm ? "outline" : "default"}
+                  size="sm"
+                >
+                  {showAddForm ? (
+                    <>
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Employee
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Add Employee Form */}
+              {showAddForm && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h3 className="font-medium text-gray-900 mb-4">Add New Employee</h3>
+                  <form onSubmit={handleAddEmployee} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName">Full Name *</Label>
+                        <Input
+                          id="fullName"
+                          value={newEmployee.fullName}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, fullName: e.target.value })}
+                          placeholder="John Doe"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="jobTitle">Job Title *</Label>
+                        <Input
+                          id="jobTitle"
+                          value={newEmployee.jobTitle}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
+                          placeholder="Project Manager"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newEmployee.email}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+                          placeholder="johnd@mma.org.za"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telephone">Telephone *</Label>
+                        <Input
+                          id="telephone"
+                          value={newEmployee.telephone}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, telephone: e.target.value })}
+                          placeholder="011 788 1278"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cellphone">Cellphone (Optional)</Label>
+                        <Input
+                          id="cellphone"
+                          value={newEmployee.cellphone}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, cellphone: e.target.value })}
+                          placeholder="082 123 4567"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button type="submit">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Employee
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
               {/* Employee Select */}
               <div className="space-y-2">
                 <Label htmlFor="employee-select">Select Employee</Label>
