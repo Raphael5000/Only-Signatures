@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '../components/button'
 import { Textarea } from '../components/textarea'
 import { Label } from '../components/label'
+import { Input } from '../components/input'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
+import { Copy } from 'lucide-react'
 
 function Editor() {
   const [signatureHtml, setSignatureHtml] = useState('')
@@ -522,7 +524,7 @@ function Editor() {
       try {
         const body = doc.body
         const height = body.scrollHeight || 150
-        previewFrameRef.current.style.height = Math.min(Math.max(height, 150), 400) + "px"
+        previewFrameRef.current.style.height = Math.min(Math.max(height, 150), 600) + "px"
       } catch (e) {
         // ignore
       }
@@ -534,41 +536,34 @@ function Editor() {
   }, [])
 
   return (
-    <div className="text-gray-900" style={{ backgroundColor: '#F7FAF9' }}>
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Main Heading */}
-        <div className="text-center mb-12">
-          <h1 className="hivory-h1 mb-4">Create and edit your email signatures</h1>
-          <p className="hivory-paragraph-medium text-gray-600">
-            Paste your HTML email signature below to detect and edit fields
-          </p>
-        </div>
+    <>
+      <div className="flex h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
+        {/* Left Sidebar */}
+        <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-6">
+            <h2 className="hivory-h5 mb-6">Create and edit your email signature</h2>
 
-        {/* Step 1: Paste your HTML signature */}
-        <div className="mb-8">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
-              1
-            </div>
-            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <h2 className="hivory-h5 mb-4">Paste your HTML email signature</h2>
-              <Textarea 
+            {/* Paste HTML */}
+            <div className="space-y-3 mb-6">
+              <Label htmlFor="signatureInput" className="text-sm font-medium text-gray-700">
+                Paste your HTML email signature
+              </Label>
+              <Textarea
                 id="signatureInput"
                 value={signatureHtml}
                 onChange={(e) => setSignatureHtml(e.target.value)}
-                className="w-full min-h-[160px] font-mono text-sm resize-y" 
+                className="w-full min-h-[120px] font-mono text-sm resize-y"
                 placeholder="Paste your HTML email signature here..."
               />
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Button 
+              <div className="flex flex-wrap gap-2">
+                <Button
                   onClick={handleDetect}
                   className="rounded-full"
                   disabled={isDetecting}
                 >
                   {isDetecting ? 'Detecting...' : 'Find fields'}
                 </Button>
-                <Button 
+                <Button
                   onClick={handleClear}
                   variant="outline"
                   className="rounded-full"
@@ -578,24 +573,17 @@ function Editor() {
                 </Button>
               </div>
               {detectStatus && (
-                <div 
-                  className="hivory-paragraph-small text-gray-500 mt-3"
+                <div
+                  className="hivory-paragraph-small text-gray-500"
                   dangerouslySetInnerHTML={{ __html: detectStatus }}
                 />
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Step 2: Edit the detected fields */}
-        <div className="mb-8">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
-              2
-            </div>
-            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="hivory-h5">Edit the detected fields</h2>
+            {/* Edit detected fields */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-800">Edit the detected fields</h3>
                 {detectedFields.length > 0 && (
                   <span className="inline-block text-[10px] px-2 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold uppercase tracking-[0.03em]">
                     Auto-detected
@@ -603,17 +591,17 @@ function Editor() {
                 )}
               </div>
               {detectedFields.length > 0 ? (
-                <div className="space-y-4">
-                  <p className="text-xs text-gray-500 mb-3">
-                    Toggle fields on/off to control which ones will be replaced. Unchecked fields will be left unchanged.
+                <>
+                  <p className="text-xs text-gray-500">
+                    Toggle fields on/off to control which will be replaced.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     {detectedFields.map((field) => (
-                      <div 
-                        key={field.key} 
+                      <div
+                        key={field.key}
                         className={`space-y-2 p-3 rounded-md border ${
-                          field.enabled 
-                            ? 'border-gray-300 bg-white' 
+                          field.enabled
+                            ? 'border-gray-300 bg-white'
                             : 'border-gray-200 bg-gray-50 opacity-60'
                         }`}
                       >
@@ -625,7 +613,7 @@ function Editor() {
                             className="w-4 h-4 text-black border-gray-300 rounded focus:ring-2 focus:ring-black"
                             id={`field-${field.key}`}
                           />
-                          <Label 
+                          <Label
                             htmlFor={`field-${field.key}`}
                             className={`text-sm font-medium ${
                               field.enabled ? 'text-gray-700' : 'text-gray-500'
@@ -634,69 +622,69 @@ function Editor() {
                             {field.label}
                           </Label>
                         </div>
-                        <input 
-                          type="text" 
+                        <Input
+                          type="text"
                           value={fieldValues[field.key] || ''}
                           onChange={(e) => handleFieldChange(field.key, e.target.value)}
                           disabled={!field.enabled}
-                          className={`w-full text-sm px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${
-                            field.enabled 
-                              ? 'border-gray-300 bg-white' 
-                              : 'border-gray-200 bg-gray-100 cursor-not-allowed'
-                          }`}
+                          className={!field.enabled ? 'bg-gray-100 cursor-not-allowed' : ''}
                         />
                         <small className="block text-xs text-gray-500">
-                          Original: <code className="font-mono">{escapeHtml(field.originalValue || "")}</code>
+                          Original: <code className="font-mono">{escapeHtml(field.originalValue || '')}</code>
                         </small>
                       </div>
                     ))}
                   </div>
-                </div>
+                </>
               ) : (
-                <div className="p-8 text-center">
-                  <p className="hivory-paragraph-small text-gray-500">
-                    {noFieldsMsg || "No fields detected yet. Paste your HTML signature and click 'Find fields'."}
-                  </p>
-                </div>
+                <p className="hivory-paragraph-small text-gray-500">
+                  {noFieldsMsg || "Paste your HTML signature and click 'Find fields'."}
+                </p>
               )}
             </div>
           </div>
+
+          {/* Bottom actions */}
+          <div className="border-t border-gray-200 p-4 bg-gray-50">
+            <Button
+              onClick={handleGenerate}
+              disabled={isGenerateDisabled}
+              className="rounded-full w-full"
+            >
+              Generate
+            </Button>
+          </div>
         </div>
 
-        {/* Step 3: Generate and preview updated signature */}
-        <div>
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold text-sm mt-1">
-              3
-            </div>
-            <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <h2 className="hivory-h5 mb-4">Generate and preview updated signature</h2>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Button 
-                  onClick={handleGenerate}
-                  disabled={isGenerateDisabled}
-                  className="rounded-full"
-                >
-                  Generate
-                </Button>
-                <Button 
+        {/* Main Preview Area */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <p className="hivory-paragraph-medium text-gray-600">
+                  Paste HTML, detect fields, edit values and generate. Your updated signature appears here.
+                </p>
+                <Button
                   onClick={handleCopy}
                   disabled={isCopyDisabled}
                   variant="outline"
                   className="rounded-full"
-                  type="button"
                 >
-                  Copy signature
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Signature
                 </Button>
               </div>
 
-              <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-2">Preview</Label>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <iframe 
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <Label className="block text-sm font-medium text-gray-700 mb-3">
+                  Preview
+                </Label>
+                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <iframe
                     ref={previewFrameRef}
-                    title="Signature preview" 
-                    className="w-full border-0 bg-white min-h-[150px]"
+                    title="Signature preview"
+                    className="w-full border-0 bg-white min-h-[200px]"
+                    style={{ maxHeight: '600px' }}
                   />
                 </div>
               </div>
@@ -705,7 +693,7 @@ function Editor() {
         </div>
       </div>
       <Toaster />
-    </div>
+    </>
   )
 }
 
