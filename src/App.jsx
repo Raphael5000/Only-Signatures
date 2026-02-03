@@ -15,6 +15,7 @@ import {
 import { Menu, X, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react'
 import Editor from './Editor'
 import Generator from './Generator'
+import Inspiration from './Inspiration'
 import MoxiiAfrica from './MoxiiAfrica'
 import Login from './Login'
 
@@ -96,6 +97,16 @@ function Layout({ children }) {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
+              <Link
+                to="/inspiration"
+                className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none ${
+                  isActive('/inspiration') ? 'bg-accent' : ''
+                }`}
+              >
+                Inspiration
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
               {isLoggedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
@@ -171,6 +182,17 @@ function Layout({ children }) {
               >
                 Generator
               </Link>
+              <Link
+                to="/inspiration"
+                className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  isActive('/inspiration')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-900 hover:bg-gray-100'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Inspiration
+              </Link>
               {isLoggedIn ? (
                 <>
                   <div className="px-6 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -240,6 +262,14 @@ function App() {
           element={
             <Layout>
               <Generator />
+            </Layout>
+          }
+        />
+        <Route
+          path="/inspiration"
+          element={
+            <Layout>
+              <Inspiration />
             </Layout>
           }
         />

@@ -1,0 +1,148 @@
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/card'
+import { Input } from '../components/input'
+import { Label } from '../components/label'
+import { Search } from 'lucide-react'
+
+const DATA_URL = '/data/inspiration-signatures.json'
+
+function filterSignatures(signatures, query) {
+  if (!signatures?.length) return []
+  const q = (query || '').trim().toLowerCase()
+  if (!q) return signatures
+  return signatures.filter((s) => {
+    const title = (s.title || '').toLowerCase()
+    const desc = (s.description || '').toLowerCase()
+    const category = (s.category || '').toLowerCase()
+    const tags = (s.tags || []).map((t) => t.toLowerCase())
+    return (
+      title.includes(q) ||
+      desc.includes(q) ||
+      category.includes(q) ||
+      tags.some((t) => t.includes(q))
+    )
+  })
+}
+
+function Inspiration() {
+  const [signatures, setSignatures] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    fetch(DATA_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error('Could not load signatures')
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setSignatures(data.signatures || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  const filtered = filterSignatures(signatures, searchQuery)
+
+  return (
+    <div className="min-h-[calc(100vh-68px)] p-6" style={{ backgroundColor: '#F7FAF9' }}>
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Inspiration</h1>
+          <p className="text-gray-600">
+            Browse signature styles to get ideas. Search by style, category or keyword.
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <Label htmlFor="inspiration-search" className="sr-only">
+            Search signatures
+          </Label>
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              id="inspiration-search"
+              type="search"
+              placeholder="Search by style, category or keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        {loading && (
+          <div className="text-center py-12 text-gray-500">Loading signatures…</div>
+        )}
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 text-sm">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && filtered.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            {searchQuery ? 'No signatures match your search.' : 'No signatures yet.'}
+          </div>
+        )}
+
+        {!loading && !error && filtered.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((sig) => (
+              <Card key={sig.id} className="overflow-hidden bg-white hover:shadow-md transition-shadow">
+                <div className="aspect-[2/1] bg-gray-100 overflow-hidden">
+                  <img
+                    src={sig.imageUrl}
+                    alt=""
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {sig.category && (
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        {sig.category}
+                      </span>
+                    )}
+                  </div>
+                  <CardTitle className="text-lg">{sig.title}</CardTitle>
+                  {sig.description && (
+                    <CardDescription className="line-clamp-3">
+                      {sig.description}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {Array.isArray(sig.tags) && sig.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {sig.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default Inspiration

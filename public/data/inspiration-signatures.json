@@ -1,0 +1,53 @@
+{
+  "updated": "2026-02-03",
+  "signatures": [
+    {
+      "id": "minimal-modern",
+      "title": "Minimal Modern",
+      "description": "Clean single-line signature with name, title and one link. Perfect for startups and freelancers.",
+      "category": "Minimal",
+      "tags": ["minimal", "modern", "startup", "freelance"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Minimal+Modern"
+    },
+    {
+      "id": "corporate-professional",
+      "title": "Corporate Professional",
+      "description": "Classic layout with logo, contact details and social links. Ideal for established brands.",
+      "category": "Corporate",
+      "tags": ["corporate", "professional", "logo", "social"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Corporate+Professional"
+    },
+    {
+      "id": "bold-color-block",
+      "title": "Bold Color Block",
+      "description": "Signature with a strong accent bar and clear hierarchy. Great for creative agencies.",
+      "category": "Creative",
+      "tags": ["bold", "color", "creative", "agency"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Bold+Color+Block"
+    },
+    {
+      "id": "two-column-contact",
+      "title": "Two-Column Contact",
+      "description": "Name and title on the left, contact details on the right. Suits sales and support roles.",
+      "category": "Professional",
+      "tags": ["two-column", "contact", "sales", "support"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Two-Column+Contact"
+    },
+    {
+      "id": "social-first",
+      "title": "Social First",
+      "description": "Prominent social icons with minimal text. Best for influencers and community managers.",
+      "category": "Social",
+      "tags": ["social", "icons", "influencer", "community"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Social+First"
+    },
+    {
+      "id": "nonprofit-warm",
+      "title": "Nonprofit & Warm",
+      "description": "Friendly tone with optional logo and clear call-to-action. Fits NGOs and charities.",
+      "category": "Nonprofit",
+      "tags": ["nonprofit", "warm", "ngo", "charity"],
+      "imageUrl": "https://placehold.co/400x200/f7faf9/1f2937?text=Nonprofit+Warm"
+    }
+  ]
+}
