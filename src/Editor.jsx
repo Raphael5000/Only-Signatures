@@ -535,13 +535,10 @@ function Editor() {
         {/* Left Sidebar */}
         <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
           <div className="flex-1 overflow-y-auto p-6">
-            <h2 className="hivory-h5 mb-6">Create and edit your email signature</h2>
+            <h2 className="hivory-h5 mb-6">Create your email signature</h2>
 
             {/* Paste HTML */}
             <div className="space-y-3 mb-6">
-              <Label htmlFor="signatureInput" className="text-sm font-medium text-gray-700">
-                Paste your HTML email signature
-              </Label>
               <Textarea
                 id="signatureInput"
                 value={signatureHtml}
@@ -631,9 +628,11 @@ function Editor() {
                   </div>
                 </>
               ) : (
-                <p className="hivory-paragraph-small text-gray-500">
-                  {noFieldsMsg || "Paste your HTML signature and click 'Find fields'."}
-                </p>
+                noFieldsMsg ? (
+                  <p className="hivory-paragraph-small text-gray-500">
+                    {noFieldsMsg}
+                  </p>
+                ) : null
               )}
             </div>
           </div>
