@@ -21,6 +21,7 @@ function Editor() {
   const previewFrameRef = useRef(null)
 
   const resetUI = () => {
+    setOriginalHtml('')
     setDetectedFields([])
     setDetectStatus('')
     setOutputHtml('')
@@ -371,7 +372,7 @@ function Editor() {
         setDetectStatus("<strong>No fields detected.</strong> The AI couldn't find any editable fields. You can still manually replace values later by editing the HTML.")
         setNoFieldsMsg("Tip: Make sure your signature contains clear fields like name, email, phone, position, etc.")
       } else {
-        setDetectStatus(`<strong>Found ${fields.length} field(s) using AI.</strong> Toggle fields on/off and edit values below, then click Generate.`)
+        setDetectStatus(`<strong>Found ${fields.length} field(s) using AI.</strong> Toggle fields on/off and edit values below. Preview updates as you type.`)
         setIsGenerateDisabled(false)
       }
     } catch (error) {
@@ -394,75 +395,72 @@ function Editor() {
   }
 
   const handleFieldToggle = (key) => {
-    setDetectedFields(prev => 
-      prev.map(field => 
-        field.key === key 
+    setDetectedFields(prev =>
+      prev.map(field =>
+        field.key === key
           ? { ...field, enabled: !field.enabled }
           : field
       )
     )
   }
 
-  const handleGenerate = () => {
-    if (!originalHtml) return
+  // Compute updated HTML from original + detected fields + current values (used for preview and copy)
+  const computeUpdatedHtml = (html, fields, values) => {
+    if (!html) return ''
+    if (!fields || fields.length === 0) return html
 
-    let updatedHtml = originalHtml
-
-    // Replace only enabled field values
-    // Sort by length (longest first) to avoid partial replacements
-    const enabledFields = detectedFields
-      .filter(field => field.enabled !== false)
+    let updatedHtml = html
+    const enabledFields = fields
+      .filter((field) => field.enabled !== false)
       .sort((a, b) => (b.originalValue?.length || 0) - (a.originalValue?.length || 0))
 
     enabledFields.forEach((field) => {
-      const newValue = fieldValues[field.key] || field.originalValue
-      if (!field.originalValue) return
-      
-      // Handle fields with replacementTargets (email, phone, social links)
+      const newValue = values[field.key] ?? field.originalValue ?? ''
+      if (field.originalValue == null) return
+
       if (field.replacementTargets && Array.isArray(field.replacementTargets)) {
-        // Replace all targets with the new value
         field.replacementTargets.forEach((target) => {
           updatedHtml = updatedHtml.split(target).join(newValue)
         })
-        
-        // For email: replace any remaining mailto: links with the original email
-        if (field.key === "email") {
-          // Replace mailto: links that contain the original email
-          const emailRegex = new RegExp(`mailto:${field.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi')
+        if (field.key === 'email') {
+          const emailRegex = new RegExp(`mailto:${(field.originalValue || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi')
           updatedHtml = updatedHtml.replace(emailRegex, `mailto:${newValue}`)
         }
-        
-        // For phone: replace any remaining tel: links with the original phone
-        if (field.key === "phone") {
-          // Normalize phone for matching (remove formatting)
-          const normalizePhone = (p) => p.replace(/[\s().-]/g, '')
+        if (field.key === 'phone') {
+          const normalizePhone = (p) => String(p).replace(/[\s().-]/g, '')
           const normalizedOriginal = normalizePhone(field.originalValue)
-          
-          // Replace tel: links that match the original phone
           updatedHtml = updatedHtml.replace(/tel:([\d\s().+-]+)/gi, (match, telValue) => {
-            if (normalizePhone(telValue.trim()) === normalizedOriginal) {
-              return `tel:${newValue}`
-            }
+            if (normalizePhone(telValue.trim()) === normalizedOriginal) return `tel:${newValue}`
             return match
           })
         }
-        
-        // For social links: ensure href attributes are updated
         if (field.key && (field.key.includes('linkedin') || field.key.includes('twitter') || field.key.includes('facebook') || field.key.includes('instagram') || field.key.includes('youtube') || field.key.includes('github') || field.key.includes('social'))) {
-          // Replace href attributes that contain the original URL
-          const escapedOriginal = field.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const escapedOriginal = (field.originalValue || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
           const hrefRegex = new RegExp(`href=["']${escapedOriginal}["']`, 'gi')
           updatedHtml = updatedHtml.replace(hrefRegex, `href="${newValue}"`)
         }
       } else {
-        // Standard replacement for other fields
         updatedHtml = updatedHtml.split(field.originalValue).join(newValue)
       }
     })
+    return updatedHtml
+  }
 
-    setOutputHtml(updatedHtml)
-    setIsCopyDisabled(!updatedHtml.trim())
-    updatePreview(updatedHtml)
+  // Live preview: when originalHtml or fields/values change, update preview and outputHtml
+  useEffect(() => {
+    if (!originalHtml) return
+    const computed = computeUpdatedHtml(originalHtml, detectedFields, fieldValues)
+    setOutputHtml(computed)
+    setIsCopyDisabled(!computed.trim())
+    updatePreview(computed)
+  }, [originalHtml, detectedFields, fieldValues])
+
+  const handleGenerate = () => {
+    if (!originalHtml) return
+    const computed = computeUpdatedHtml(originalHtml, detectedFields, fieldValues)
+    setOutputHtml(computed)
+    setIsCopyDisabled(!computed.trim())
+    updatePreview(computed)
   }
 
   const handleCopy = async () => {
@@ -485,21 +483,17 @@ function Editor() {
       }
     }
 
-    // Fallback: select the textarea and copy as text
-    const textarea = document.getElementById("outputHtml")
-    if (textarea) {
-      textarea.focus()
-      textarea.select()
-      try {
-        document.execCommand("copy")
-        toast.success("Signature Copied", {
-          description: "Paste it into your email client"
-        })
-      } catch (err) {
-        console.error("Copy failed", err)
-      } finally {
-        window.getSelection().removeAllRanges()
-      }
+    // Fallback: copy as plain text
+    try {
+      await navigator.clipboard.writeText(html)
+      toast.success("Signature Copied", {
+        description: "Paste it into your email client"
+      })
+    } catch (err) {
+      console.error("Copy failed", err)
+      toast.error("Copy Failed", {
+        description: "Please try selecting and copying manually"
+      })
     }
   }
 
