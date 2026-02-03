@@ -525,7 +525,7 @@ function Editor() {
       try {
         const body = doc.body
         const height = body.scrollHeight || 150
-        previewFrameRef.current.style.height = Math.min(Math.max(height, 150), 600) + "px"
+        previewFrameRef.current.style.height = Math.max(height, 150) + "px"
       } catch (e) {
         // ignore
       }
@@ -678,7 +678,6 @@ function Editor() {
                   ref={previewFrameRef}
                   title="Signature preview"
                   className="w-full border-0 bg-white min-h-[200px] block"
-                  style={{ maxHeight: '600px' }}
                 />
               </PreviewWindow>
             </div>
@@ -713,7 +712,6 @@ function Editor() {
                   ref={previewFrameRef}
                   title="Signature preview"
                   className="w-full border-0 bg-white min-h-[200px] block"
-                  style={{ maxHeight: '600px' }}
                 />
               </PreviewWindow>
             </div>

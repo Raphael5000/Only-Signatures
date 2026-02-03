@@ -35,8 +35,8 @@ function PreviewWindow({ children, footer, className }) {
         <div className="h-3 bg-gray-200 rounded w-full max-w-[70%]" />
       </div>
 
-      {/* Preview content */}
-      <div className="border border-gray-200 border-t-0 overflow-hidden bg-gray-50">
+      {/* Preview content - scrollable when signature is tall */}
+      <div className="border border-gray-200 border-t-0 max-h-[600px] overflow-y-auto bg-gray-50">
         {children}
       </div>
 

@@ -122,7 +122,7 @@ function MoxiiAfrica() {
       try {
         const body = doc.body
         const height = body.scrollHeight || 200
-        previewFrameRef.current.style.height = Math.min(Math.max(height, 200), 600) + "px"
+        previewFrameRef.current.style.height = Math.max(height, 200) + "px"
       } catch (e) {
         // ignore
       }
@@ -534,12 +534,8 @@ function MoxiiAfrica() {
                   ref={previewFrameRef}
                   title="Signature preview"
                   className="w-full border-0 bg-white min-h-[200px]"
-                  style={{ maxHeight: '600px' }}
                 />
               </PreviewWindow>
-              <p className="text-xs text-gray-500 mt-4 text-center">
-                Using Apple Mail? Use <strong>Copy for Apple Mail</strong> so the logo pastes correctly. Then in Mail, paste (Cmd+V) into the message or add via Mail → Preferences → Signatures.
-              </p>
             </div>
           </div>
         </div>

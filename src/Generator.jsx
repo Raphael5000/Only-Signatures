@@ -131,7 +131,7 @@ function Generator() {
       try {
         const body = doc.body
         const height = body.scrollHeight || 150
-        previewFrameRef.current.style.height = Math.min(Math.max(height, 150), 600) + "px"
+        previewFrameRef.current.style.height = Math.max(height, 150) + "px"
       } catch (e) {
         // ignore
       }
@@ -301,61 +301,30 @@ function Generator() {
           </div>
         </div>
 
-        {/* Main Preview Area */}
-        <div className="flex-1 w-full">
-          {/* Desktop preview */}
-          <div className="hidden md:flex h-[calc(100vh-68px)] items-center justify-center px-6">
-            <div className="w-full max-w-[40rem]">
-              <p className="hivory-paragraph-medium text-gray-600 mb-6">
-                Fill in your information and let AI create a world-class email signature
-              </p>
-              <PreviewWindow
-                footer={
-                  <Button
-                    onClick={handleCopy}
-                    disabled={isCopyDisabled}
-                    className="rounded-full"
-                  >
-                    <Copy className="h-4 w-4" />
-                    Copy signature
-                  </Button>
-                }
-              >
-                <iframe
-                  ref={previewFrameRef}
-                  title="Signature preview"
-                  className="w-full border-0 bg-white min-h-[200px]"
-                  style={{ maxHeight: '600px' }}
-                />
-              </PreviewWindow>
-            </div>
-          </div>
-          {/* Mobile preview */}
-          <div className="md:hidden px-6 py-6">
-            <div className="w-full max-w-[40rem] mx-auto">
-              <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center">
-                Fill in your information and let AI create a world-class email signature
-              </p>
-              <PreviewWindow
-                footer={
-                  <Button
-                    onClick={handleCopy}
-                    disabled={isCopyDisabled}
-                    className="rounded-full"
-                  >
-                    <Copy className="h-4 w-4" />
-                    Copy signature
-                  </Button>
-                }
-              >
-                <iframe
-                  ref={previewFrameRef}
-                  title="Signature preview"
-                  className="w-full border-0 bg-white min-h-[200px]"
-                  style={{ maxHeight: '600px' }}
-                />
-              </PreviewWindow>
-            </div>
+        {/* Main Preview Area - single iframe so ref always targets the visible preview */}
+        <div className="flex-1 w-full flex flex-col md:justify-center min-h-[calc(100vh-68px)] px-6 py-6 md:py-0">
+          <div className="w-full max-w-[40rem] mx-auto flex-1 flex flex-col">
+            <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center md:text-left">
+              Fill in your information and let AI create a world-class email signature
+            </p>
+            <PreviewWindow
+              footer={
+                <Button
+                  onClick={handleCopy}
+                  disabled={isCopyDisabled}
+                  className="rounded-full"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy signature
+                </Button>
+              }
+            >
+              <iframe
+                ref={previewFrameRef}
+                title="Signature preview"
+                className="w-full border-0 bg-white min-h-[200px]"
+              />
+            </PreviewWindow>
           </div>
         </div>
       </div>
