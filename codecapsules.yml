@@ -8,6 +8,19 @@ serve:
   routes:
     "/*": "/index.html"
   headers:
+    # Prevent caching of HTML so logged-in users always get fresh app
+    - name: Cache-Control
+      value: "no-cache, no-store, must-revalidate"
+      path: "/index.html"
+    - name: Cache-Control
+      value: "no-cache, no-store, must-revalidate"
+      path: "/"
+    - name: Pragma
+      value: "no-cache"
+      path: "/index.html"
+    - name: Expires
+      value: "0"
+      path: "/index.html"
     - name: Content-Type
       value: "application/javascript"
       path: "*.js"

@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../components/dropdown-menu'
-import { Menu, X, ChevronDown, LogOut } from 'lucide-react'
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react'
 import Editor from './Editor'
 import Generator from './Generator'
 import MoxiiAfrica from './MoxiiAfrica'
@@ -103,6 +103,15 @@ function Layout({ children }) {
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (authenticatedClient?.route) navigate(authenticatedClient.route)
+                      }}
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
@@ -167,9 +176,21 @@ function Layout({ children }) {
                   <div className="px-6 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
                     {authenticatedClient?.name}
                   </div>
+                  <Link
+                    to={authenticatedClient?.route || '/'}
+                    className={`px-6 py-3 text-sm font-medium transition-colors flex items-center ${
+                      isActive(authenticatedClient?.route)
+                        ? 'text-gray-900 bg-gray-100'
+                        : 'text-gray-900 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="px-6 py-3 text-sm font-medium transition-colors text-gray-900 hover:bg-gray-100 text-left flex items-center"
+                    className="px-6 py-3 text-sm font-medium transition-colors text-gray-900 hover:bg-gray-100 text-left flex items-center w-full"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
