@@ -537,9 +537,9 @@ function Editor() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
         {/* Left Sidebar */}
-        <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
           <div className="flex-1 overflow-y-auto p-6">
             <h2 className="hivory-h5 mb-6">Create your email signature</h2>
 
@@ -646,8 +646,8 @@ function Editor() {
         </div>
 
         {/* Main Preview Area - Fake email client window */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-6 flex items-center justify-center min-h-0">
+        <div className="flex-1 flex flex-col w-full">
+          <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start md:items-center min-h-0">
             <div className="w-full max-w-[40rem] mx-auto">
               {/* Fake window chrome */}
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
