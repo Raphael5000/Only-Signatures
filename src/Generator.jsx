@@ -3,6 +3,7 @@ import { Button } from '../components/button'
 import { Input } from '../components/input'
 import { Textarea } from '../components/textarea'
 import { Label } from '../components/label'
+import PreviewWindow from '../components/preview-window'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
 import { Send, Copy, Loader2 } from 'lucide-react'
@@ -156,9 +157,9 @@ function Generator() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
         {/* Left Sidebar */}
-        <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
           <div className="flex-1 overflow-y-auto p-6">
             <h2 className="hivory-h5 mb-6">Your Information</h2>
             
@@ -301,39 +302,31 @@ function Generator() {
         </div>
 
         {/* Main Preview Area */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="hivory-paragraph-medium text-gray-600">
-                    Fill in your information and let AI create a world-class email signature
-                  </p>
-                </div>
-                <Button
-                  onClick={handleCopy}
-                  disabled={isCopyDisabled}
-                  variant="outline"
-                  className="rounded-full"
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Signature
-                </Button>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                <Label className="block text-sm font-medium text-gray-700 mb-3">
-                  Preview
-                </Label>
-                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                  <iframe
-                    ref={previewFrameRef}
-                    title="Signature preview"
-                    className="w-full border-0 bg-white min-h-[200px]"
-                    style={{ maxHeight: '600px' }}
-                  />
-                </div>
-              </div>
+        <div className="flex-1 flex flex-col w-full">
+          <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start md:items-center min-h-0">
+            <div className="w-full max-w-[40rem] mx-auto">
+              <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center md:text-left">
+                Fill in your information and let AI create a world-class email signature
+              </p>
+              <PreviewWindow
+                footer={
+                  <Button
+                    onClick={handleCopy}
+                    disabled={isCopyDisabled}
+                    className="rounded-full"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copy signature
+                  </Button>
+                }
+              >
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px]"
+                  style={{ maxHeight: '600px' }}
+                />
+              </PreviewWindow>
             </div>
           </div>
         </div>

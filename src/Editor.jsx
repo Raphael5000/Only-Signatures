@@ -4,6 +4,7 @@ import { Textarea } from '../components/textarea'
 import { Label } from '../components/label'
 import { Input } from '../components/input'
 import { Switch } from '../components/switch'
+import PreviewWindow from '../components/preview-window'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
 import { Copy, RotateCcw } from 'lucide-react'
@@ -649,72 +650,37 @@ function Editor() {
         <div className="flex-1 flex flex-col w-full">
           <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start md:items-center min-h-0">
             <div className="w-full max-w-[40rem] mx-auto">
-              {/* Fake window chrome */}
-              <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-                {/* macOS-style title bar */}
-                <div className="flex items-center gap-2 h-8 px-3 bg-[#2d2d2d] rounded-t-lg">
-                  <div className="flex gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                    <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                    <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-                  </div>
-                </div>
-
-                {/* Email header (To / Subject) */}
-                <div className="px-4 pt-4 pb-2 border-b border-gray-100 bg-white">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-bold text-gray-900 w-14 shrink-0">To:</span>
-                    <span
-                      className="block min-h-[28px] px-2 py-1 text-sm text-gray-500 rounded border border-[#86efac] bg-[#dcfce7] w-fit"
-                      aria-hidden
+              <PreviewWindow
+                footer={
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClear}
+                      className="rounded-full"
                     >
-                      Your Recipient
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-900 w-14 shrink-0">Subject:</span>
-                    <span className="text-sm text-gray-700">Check out my new Email Signature</span>
-                  </div>
-                </div>
-
-                {/* Fake body lines */}
-                <div className="px-4 py-3 border-b border-gray-100 bg-white">
-                  <div className="h-3 bg-gray-200 rounded w-full max-w-[95%] mb-2" />
-                  <div className="h-3 bg-gray-200 rounded w-full max-w-[70%]" />
-                </div>
-
-                {/* Signature preview iframe */}
-                <div className="border border-gray-200 border-t-0 overflow-hidden bg-gray-50">
-                  <iframe
-                    ref={previewFrameRef}
-                    title="Signature preview"
-                    className="w-full border-0 bg-white min-h-[200px] block"
-                    style={{ maxHeight: '600px' }}
-                  />
-                </div>
-
-                {/* Buttons below window - our button styling */}
-                <div className="flex items-center justify-center gap-4 py-5 px-4 bg-white border-t border-gray-100">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleClear}
-                    className="rounded-full"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Clear fields
-                  </Button>
-                  <Button
-                    onClick={handleCopy}
-                    disabled={isCopyDisabled}
-                    variant="default"
-                    className="rounded-full"
-                  >
-                    <Copy className="h-4 w-4" />
-                    Copy signature
-                  </Button>
-                </div>
-              </div>
+                      <RotateCcw className="h-4 w-4" />
+                      Clear fields
+                    </Button>
+                    <Button
+                      onClick={handleCopy}
+                      disabled={isCopyDisabled}
+                      variant="default"
+                      className="rounded-full"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy signature
+                    </Button>
+                  </>
+                }
+              >
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px] block"
+                  style={{ maxHeight: '600px' }}
+                />
+              </PreviewWindow>
             </div>
           </div>
         </div>
