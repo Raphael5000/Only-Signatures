@@ -38,14 +38,16 @@ const initialEmployees = [
 ]
 
 const NAME_COLORS = [
-  { label: 'Red', value: '#F94C1E' },
-  { label: 'Blue', value: '#4A54E0' },
-  { label: 'Violet', value: '#A952FF' },
-  { label: 'Turquoise', value: '#32B281' },
-  { label: 'Navy', value: '#1F053D' },
+  { label: 'Red', value: '#F94C1E', logoUrl: 'https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6937f1d122a43ccdadb91593_Moxii%20Africa%20-%20Logo%20Horizontal%20-%20Red.png' },
+  { label: 'Blue', value: '#4A54E0', logoUrl: 'https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6981aa20f34450498b20a5cb_Moxii%20Africa%20-%20Blue.png' },
+  { label: 'Violet', value: '#A952FF', logoUrl: 'https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6981aa206e8ea46ef5de4b54_Moxii%20Africa%20-%20Violet.png' },
+  { label: 'Turquoise', value: '#32B281', logoUrl: 'https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6981aa20a0c351e665e3d3dc_Moxii%20Africa%20-%20Turquise.png' },
+  { label: 'Navy', value: '#1F053D', logoUrl: 'https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6981aa202c7cd82b5425c4ca_Moxii%20Africa%20-%20Navy.png' },
 ]
 
-function generateSignature(employee, nameColor = '#F94C1E') {
+const defaultColor = NAME_COLORS[0]
+
+function generateSignature(employee, nameColor = defaultColor.value, logoUrl = defaultColor.logoUrl) {
   const { fullName, jobTitle, cellphone, telephone, email } = employee
   
   // Format phone numbers
@@ -60,7 +62,7 @@ function generateSignature(employee, nameColor = '#F94C1E') {
     contactLine = `<div><span style="font-weight:700;color:rgb(0,0,0)">T:</span>&nbsp;${formattedTelephone}</div>`
   }
 
-  return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:13px;line-height:18px;color:rgb(68,68,68)"><tbody><tr><td style="padding:12px 0px"><table cellpadding="0" cellspacing="0" border="0" style="width:284.531px"><tbody><tr><td style="padding-right:14px;vertical-align:top"><div style="font-size:20px;font-weight:700;color:${nameColor};line-height:24px">${fullName}</div><div style="height:4px;line-height:4px">&nbsp;</div><div style="font-size:16px;font-weight:700;color:rgb(102,102,102);line-height:20px">${jobTitle}</div><div style="margin-top:10px;font-size:12px;line-height:18px">${contactLine}<div><span style="font-weight:700;color:rgb(0,0,0)">E:</span>&nbsp;<a href="mailto:${email}" style="color:rgb(68,68,68)" target="_blank">${email}</a>&nbsp;|&nbsp;<span style="font-weight:700;color:rgb(0,0,0)">W:</span>&nbsp;<a href="https://www.moxiiafrica.org" style="color:rgb(68,68,68)" target="_blank">www.moxiiafrica.org</a></div></div><div style="margin-top:10px;font-size:12px;line-height:18px"><div>Suite 102, Art Centre 7</div><div>Parkhurst, Randburg, 2193, South Africa</div></div><div style="margin-top:16px"><img src="https://cdn.prod.website-files.com/68c9713ec8532533d3b4e006/6937f1d122a43ccdadb91593_Moxii%20Africa%20-%20Logo%20Horizontal%20-%20Red.png" alt="Moxii Africa Logo" style="display:block;height:80px;width:auto;border:0px"></div><div style="margin-top:8px;font-size:12px;line-height:18px;font-weight:700;color:rgb(68,68,68)">Formerly Media Monitoring Africa</div><div style="margin-top:16px;font-size:12px;line-height:18px;font-weight:700">Connect with us</div><div style="margin-top:4px;font-size:12px;line-height:18px"><a href="https://www.facebook.com/mediamattersza" style="color:rgb(68,68,68)" target="_blank">Facebook</a>&nbsp;|&nbsp;<a href="https://www.youtube.com/channel/UCITuvEZEPVG_bhX66YRrWXQ" style="color:rgb(68,68,68)" target="_blank">YouTube</a>&nbsp;|&nbsp;<a href="https://x.com/MediaMattersZA" style="color:rgb(68,68,68)" target="_blank">X</a>&nbsp;|&nbsp;<a href="https://www.linkedin.com/company/media-monitoring-africa/?originalSubdomain=za" style="color:rgb(68,68,68)" target="_blank">LinkedIn</a>&nbsp;|&nbsp;<a href="https://www.instagram.com/mediamatters_za/" style="color:rgb(68,68,68)" target="_blank">Instagram</a></div></td></tr></tbody></table></td></tr></tbody></table>`
+  return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:13px;line-height:18px;color:rgb(68,68,68)"><tbody><tr><td style="padding:12px 0px"><table cellpadding="0" cellspacing="0" border="0" style="width:284.531px"><tbody><tr><td style="padding-right:14px;vertical-align:top"><div style="font-size:20px;font-weight:700;color:${nameColor};line-height:24px">${fullName}</div><div style="height:4px;line-height:4px">&nbsp;</div><div style="font-size:16px;font-weight:700;color:rgb(102,102,102);line-height:20px">${jobTitle}</div><div style="margin-top:10px;font-size:12px;line-height:18px">${contactLine}<div><span style="font-weight:700;color:rgb(0,0,0)">E:</span>&nbsp;<a href="mailto:${email}" style="color:rgb(68,68,68)" target="_blank">${email}</a>&nbsp;|&nbsp;<span style="font-weight:700;color:rgb(0,0,0)">W:</span>&nbsp;<a href="https://www.moxiiafrica.org" style="color:rgb(68,68,68)" target="_blank">www.moxiiafrica.org</a></div></div><div style="margin-top:10px;font-size:12px;line-height:18px"><div>Suite 102, Art Centre 7</div><div>Parkhurst, Randburg, 2193, South Africa</div></div><div style="margin-top:16px"><img src="${logoUrl}" alt="Moxii Africa Logo" style="display:block;height:80px;width:auto;border:0px"></div><div style="margin-top:8px;font-size:12px;line-height:18px;font-weight:700;color:rgb(68,68,68)">Formerly Media Monitoring Africa</div><div style="margin-top:16px;font-size:12px;line-height:18px;font-weight:700">Connect with us</div><div style="margin-top:4px;font-size:12px;line-height:18px"><a href="https://www.facebook.com/mediamattersza" style="color:rgb(68,68,68)" target="_blank">Facebook</a>&nbsp;|&nbsp;<a href="https://www.youtube.com/channel/UCITuvEZEPVG_bhX66YRrWXQ" style="color:rgb(68,68,68)" target="_blank">YouTube</a>&nbsp;|&nbsp;<a href="https://x.com/MediaMattersZA" style="color:rgb(68,68,68)" target="_blank">X</a>&nbsp;|&nbsp;<a href="https://www.linkedin.com/company/media-monitoring-africa/?originalSubdomain=za" style="color:rgb(68,68,68)" target="_blank">LinkedIn</a>&nbsp;|&nbsp;<a href="https://www.instagram.com/mediamatters_za/" style="color:rgb(68,68,68)" target="_blank">Instagram</a></div></td></tr></tbody></table></td></tr></tbody></table>`
 }
 
 function MoxiiAfrica() {
@@ -80,7 +82,8 @@ function MoxiiAfrica() {
   const previewFrameRef = useRef(null)
 
   const currentEmployee = employees.find(e => e.fullName === selectedEmployee)
-  const signatureHtml = currentEmployee ? generateSignature(currentEmployee, nameColor) : ''
+  const selectedColorOption = NAME_COLORS.find(c => c.value === nameColor) || defaultColor
+  const signatureHtml = currentEmployee ? generateSignature(currentEmployee, nameColor, selectedColorOption.logoUrl) : ''
 
   const updatePreview = (html) => {
     if (!previewFrameRef.current) return
@@ -407,7 +410,7 @@ function MoxiiAfrica() {
 
               {/* Name Color */}
               <div className="space-y-2">
-                <Label htmlFor="name-color">Name color</Label>
+                <Label htmlFor="name-color">Color</Label>
                 <Select value={nameColor} onValueChange={setNameColor}>
                   <SelectTrigger className="w-full md:w-96">
                     <SelectValue placeholder="Pick a color..." />
