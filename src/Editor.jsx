@@ -3,6 +3,7 @@ import { Button } from '../components/button'
 import { Textarea } from '../components/textarea'
 import { Label } from '../components/label'
 import { Input } from '../components/input'
+import { Switch } from '../components/switch'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
 import { Copy, RotateCcw } from 'lucide-react'
@@ -394,11 +395,16 @@ function Editor() {
     }))
   }
 
-  const handleFieldToggle = (key) => {
+  const handleFieldToggle = (key, nextEnabled) => {
     setDetectedFields(prev =>
       prev.map(field =>
-        field.key === key
-          ? { ...field, enabled: !field.enabled }
+        field.key === key 
+          ? { 
+              ...field, 
+              enabled: typeof nextEnabled === 'boolean' 
+                ? nextEnabled 
+                : !(field.enabled !== false) 
+            }
           : field
       )
     )
@@ -573,14 +579,6 @@ function Editor() {
 
             {/* Edit detected fields */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-800">Edit the detected fields</h3>
-                {detectedFields.length > 0 && (
-                  <span className="inline-block text-[10px] px-2 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold uppercase tracking-[0.03em]">
-                    Auto-detected
-                  </span>
-                )}
-              </div>
               {detectedFields.length > 0 ? (
                 <>
                   <p className="text-xs text-gray-500">
@@ -597,18 +595,16 @@ function Editor() {
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={field.enabled !== false}
-                            onChange={() => handleFieldToggle(field.key)}
-                            className="w-4 h-4 text-black border-gray-300 rounded focus:ring-2 focus:ring-black"
+                          <Switch
                             id={`field-${field.key}`}
+                            checked={field.enabled !== false}
+                            onCheckedChange={(checked) => handleFieldToggle(field.key, checked)}
                           />
                           <Label
                             htmlFor={`field-${field.key}`}
                             className={`text-sm font-medium ${
                               field.enabled ? 'text-gray-700' : 'text-gray-500'
-                            } cursor-pointer`}
+                            }`}
                           >
                             {field.label}
                           </Label>
@@ -706,7 +702,7 @@ function Editor() {
                     className="rounded-full"
                   >
                     <RotateCcw className="h-4 w-4" />
-                    Clear all input fields
+                    Clear fields
                   </Button>
                   <Button
                     onClick={handleCopy}
