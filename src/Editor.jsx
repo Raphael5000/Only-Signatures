@@ -540,7 +540,7 @@ function Editor() {
     <>
       <div className="flex flex-col md:flex-row min-h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
         {/* Left Sidebar */}
-        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col md:h-[calc(100vh-68px)]">
           <div className="flex-1 overflow-y-auto p-6">
             <h2 className="hivory-h5 mb-6">Create your email signature</h2>
 
@@ -646,9 +646,45 @@ function Editor() {
           </div>
         </div>
 
-        {/* Main Preview Area - Fake email client window */}
-        <div className="flex-1 flex flex-col w-full">
-          <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start md:items-center min-h-0">
+        {/* Main Preview Area */}
+        <div className="flex-1 w-full">
+          {/* Desktop: fixed-centered preview */}
+          <div className="hidden md:flex h-[calc(100vh-68px)] items-center justify-center px-6">
+            <div className="w-full max-w-[40rem]">
+              <PreviewWindow
+                footer={
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClear}
+                      className="rounded-full"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Clear fields
+                    </Button>
+                    <Button
+                      onClick={handleCopy}
+                      disabled={isCopyDisabled}
+                      className="rounded-full"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy signature
+                    </Button>
+                  </>
+                }
+              >
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px] block"
+                  style={{ maxHeight: '600px' }}
+                />
+              </PreviewWindow>
+            </div>
+          </div>
+          {/* Mobile: stacked preview */}
+          <div className="md:hidden px-6 py-6">
             <div className="w-full max-w-[40rem] mx-auto">
               <PreviewWindow
                 footer={
@@ -665,7 +701,6 @@ function Editor() {
                     <Button
                       onClick={handleCopy}
                       disabled={isCopyDisabled}
-                      variant="default"
                       className="rounded-full"
                     >
                       <Copy className="h-4 w-4" />

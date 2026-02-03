@@ -159,7 +159,7 @@ function Generator() {
     <>
       <div className="flex flex-col md:flex-row min-h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
         {/* Left Sidebar */}
-        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-96 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col md:h-[calc(100vh-68px)]">
           <div className="flex-1 overflow-y-auto p-6">
             <h2 className="hivory-h5 mb-6">Your Information</h2>
             
@@ -302,10 +302,38 @@ function Generator() {
         </div>
 
         {/* Main Preview Area */}
-        <div className="flex-1 flex flex-col w-full">
-          <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start md:items-center min-h-0">
+        <div className="flex-1 w-full">
+          {/* Desktop preview */}
+          <div className="hidden md:flex h-[calc(100vh-68px)] items-center justify-center px-6">
+            <div className="w-full max-w-[40rem]">
+              <p className="hivory-paragraph-medium text-gray-600 mb-6">
+                Fill in your information and let AI create a world-class email signature
+              </p>
+              <PreviewWindow
+                footer={
+                  <Button
+                    onClick={handleCopy}
+                    disabled={isCopyDisabled}
+                    className="rounded-full"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copy signature
+                  </Button>
+                }
+              >
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px]"
+                  style={{ maxHeight: '600px' }}
+                />
+              </PreviewWindow>
+            </div>
+          </div>
+          {/* Mobile preview */}
+          <div className="md:hidden px-6 py-6">
             <div className="w-full max-w-[40rem] mx-auto">
-              <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center md:text-left">
+              <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center">
                 Fill in your information and let AI create a world-class email signature
               </p>
               <PreviewWindow
