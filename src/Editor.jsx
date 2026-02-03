@@ -652,8 +652,8 @@ function Editor() {
 
         {/* Main Preview Area - Fake email client window */}
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-4xl mx-auto">
+          <div className="flex-1 overflow-y-auto p-6 flex items-center justify-center min-h-0">
+            <div className="w-full max-w-[40rem] mx-auto">
               {/* Fake window chrome */}
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
                 {/* macOS-style title bar */}
@@ -670,7 +670,7 @@ function Editor() {
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm font-bold text-gray-900 w-14 shrink-0">To:</span>
                     <span
-                      className="flex-1 min-h-[28px] px-2 py-1 text-sm text-gray-500 rounded border border-[#86efac] bg-[#dcfce7]"
+                      className="block min-h-[28px] px-2 py-1 text-sm text-gray-500 rounded border border-[#86efac] bg-[#dcfce7] w-fit"
                       aria-hidden
                     >
                       Your Recipient
@@ -698,22 +698,24 @@ function Editor() {
                   />
                 </div>
 
-                {/* Buttons below window (like the reference) */}
+                {/* Buttons below window - our button styling */}
                 <div className="flex items-center justify-center gap-4 py-5 px-4 bg-white border-t border-gray-100">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={handleClear}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                    className="rounded-full"
                   >
                     <RotateCcw className="h-4 w-4" />
                     Clear all input fields
-                  </button>
+                  </Button>
                   <Button
                     onClick={handleCopy}
                     disabled={isCopyDisabled}
-                    className="rounded-md bg-[#ea580c] hover:bg-[#c2410c] text-white px-5 py-2 font-medium"
+                    variant="default"
+                    className="rounded-full"
                   >
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="h-4 w-4" />
                     Copy signature
                   </Button>
                 </div>
