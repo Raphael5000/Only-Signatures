@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '../components/button'
 import { Input } from '../components/input'
 import { Label } from '../components/label'
+import PreviewWindow from '../components/preview-window'
 import {
   Select,
   SelectContent,
@@ -270,290 +271,298 @@ function MoxiiAfrica() {
     })
   }
 
+  const renderPreviewFooter = () => (
+    <>
+      <Button
+        onClick={handleCopy}
+        disabled={!selectedEmployee}
+        variant={copied ? "default" : "outline"}
+        className="rounded-full"
+      >
+        {copied ? (
+          <>
+            <Check className="h-4 w-4 mr-2" />
+            Copied!
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Signature
+          </>
+        )}
+      </Button>
+      <Button
+        onClick={handleCopyForAppleMail}
+        disabled={!selectedEmployee || copyingForAppleMail}
+        variant="outline"
+        className="rounded-full"
+      >
+        {copyingForAppleMail ? (
+          <>Preparing…</>
+        ) : (
+          <>Copy for Apple Mail</>
+        )}
+      </Button>
+    </>
+  )
+
   return (
     <>
-      <div className="min-h-[calc(100vh-68px)] p-6" style={{ backgroundColor: '#F7FAF9' }}>
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Moxii Africa</h1>
-            <p className="text-gray-600">
-              Select your name from the dropdown below to view and copy your email signature.
-            </p>
-          </div>
-
-          {/* Main Card */}
-          <Card className="bg-white">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Email Signature Generator</CardTitle>
-                  <CardDescription>
-                    Choose an employee to generate their personalized email signature
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => {
-                      setShowManageEmployees(!showManageEmployees)
-                      if (showAddForm) setShowAddForm(false)
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Manage ({employees.length})
-                    {showManageEmployees ? (
-                      <ChevronUp className="h-4 w-4 ml-1" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 ml-1" />
-                    )}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setShowAddForm(!showAddForm)
-                      if (showManageEmployees) setShowManageEmployees(false)
-                    }}
-                    variant={showAddForm ? "outline" : "default"}
-                    size="sm"
-                  >
-                    {showAddForm ? (
-                      <>
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Employee
-                      </>
-                    )}
-                  </Button>
-                </div>
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-68px)]" style={{ backgroundColor: '#F7FAF9' }}>
+        {/* Left column */}
+        <div className="w-full md:w-[60%] bg-white/60 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col md:h-[calc(100vh-68px)]">
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-4xl mx-auto md:max-w-none">
+              {/* Header */}
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Moxii Africa</h1>
+                <p className="text-gray-600">
+                  Select your name from the dropdown below to view and copy your email signature.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Add Employee Form */}
-              {showAddForm && (
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-medium text-gray-900 mb-4">Add New Employee</h3>
-                  <form onSubmit={handleAddEmployee} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name *</Label>
-                        <Input
-                          id="fullName"
-                          value={newEmployee.fullName}
-                          onChange={(e) => setNewEmployee({ ...newEmployee, fullName: e.target.value })}
-                          placeholder="John Doe"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="jobTitle">Job Title *</Label>
-                        <Input
-                          id="jobTitle"
-                          value={newEmployee.jobTitle}
-                          onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
-                          placeholder="Project Manager"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={newEmployee.email}
-                          onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                          placeholder="johnd@mma.org.za"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="telephone">Telephone *</Label>
-                        <Input
-                          id="telephone"
-                          value={newEmployee.telephone}
-                          onChange={(e) => setNewEmployee({ ...newEmployee, telephone: e.target.value })}
-                          placeholder="011 788 1278"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cellphone">Cellphone (Optional)</Label>
-                        <Input
-                          id="cellphone"
-                          value={newEmployee.cellphone}
-                          onChange={(e) => setNewEmployee({ ...newEmployee, cellphone: e.target.value })}
-                          placeholder="082 123 4567"
-                        />
-                      </div>
+
+              <Card className="bg-white">
+                <CardHeader>
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <CardTitle>Email Signature Generator</CardTitle>
+                      <CardDescription>
+                        Choose an employee to generate their personalized email signature
+                      </CardDescription>
                     </div>
-                    <div className="flex justify-end">
-                      <Button type="submit">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Employee
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => {
+                          setShowManageEmployees(!showManageEmployees)
+                          if (showAddForm) setShowAddForm(false)
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Manage ({employees.length})
+                        {showManageEmployees ? (
+                          <ChevronUp className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setShowAddForm(!showAddForm)
+                          if (showManageEmployees) setShowManageEmployees(false)
+                        }}
+                        variant={showAddForm ? "outline" : "default"}
+                        size="sm"
+                      >
+                        {showAddForm ? (
+                          <>
+                            <X className="h-4 w-4 mr-2" />
+                            Cancel
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Employee
+                          </>
+                        )}
                       </Button>
                     </div>
-                  </form>
-                </div>
-              )}
-
-              {/* Manage Employees Section */}
-              {showManageEmployees && (
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-medium text-gray-900 mb-4">Manage Employees</h3>
-                  <div className="max-h-80 overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead className="text-left text-gray-500 border-b">
-                        <tr>
-                          <th className="pb-2 font-medium">Name</th>
-                          <th className="pb-2 font-medium hidden md:table-cell">Title</th>
-                          <th className="pb-2 font-medium hidden lg:table-cell">Email</th>
-                          <th className="pb-2 font-medium w-20 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {employees.map((employee) => (
-                          <tr key={employee.email} className="hover:bg-gray-100">
-                            <td className="py-2 pr-2">
-                              <div className="font-medium text-gray-900">{employee.fullName}</div>
-                              <div className="text-gray-500 md:hidden text-xs">{employee.jobTitle}</div>
-                            </td>
-                            <td className="py-2 pr-2 hidden md:table-cell text-gray-600 truncate max-w-[200px]">
-                              {employee.jobTitle}
-                            </td>
-                            <td className="py-2 pr-2 hidden lg:table-cell text-gray-600">
-                              {employee.email}
-                            </td>
-                            <td className="py-2 text-right">
-                              <Button
-                                onClick={() => handleDeleteEmployee(employee.email)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
-                  {employees.length === 0 && (
-                    <p className="text-center text-gray-500 py-4">No employees added yet.</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Add Employee Form */}
+                  {showAddForm && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h3 className="font-medium text-gray-900 mb-4">Add New Employee</h3>
+                      <form onSubmit={handleAddEmployee} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="fullName">Full Name *</Label>
+                            <Input
+                              id="fullName"
+                              value={newEmployee.fullName}
+                              onChange={(e) => setNewEmployee({ ...newEmployee, fullName: e.target.value })}
+                              placeholder="John Doe"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="jobTitle">Job Title *</Label>
+                            <Input
+                              id="jobTitle"
+                              value={newEmployee.jobTitle}
+                              onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
+                              placeholder="Project Manager"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email Address *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={newEmployee.email}
+                              onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+                              placeholder="johnd@mma.org.za"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="telephone">Telephone *</Label>
+                            <Input
+                              id="telephone"
+                              value={newEmployee.telephone}
+                              onChange={(e) => setNewEmployee({ ...newEmployee, telephone: e.target.value })}
+                              placeholder="011 788 1278"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="cellphone">Cellphone (Optional)</Label>
+                            <Input
+                              id="cellphone"
+                              value={newEmployee.cellphone}
+                              onChange={(e) => setNewEmployee({ ...newEmployee, cellphone: e.target.value })}
+                              placeholder="082 123 4567"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button type="submit">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Employee
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
                   )}
-                </div>
-              )}
 
-              {/* Employee Select */}
-              <div className="space-y-2">
-                <Label htmlFor="employee-select">Select Employee</Label>
-                <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                  <SelectTrigger className="w-full md:w-96">
-                    <SelectValue placeholder="Choose your name..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map((employee) => (
-                      <SelectItem key={employee.email} value={employee.fullName}>
-                        {employee.fullName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Name Color */}
-              <div className="space-y-2">
-                <Label htmlFor="name-color">Color</Label>
-                <Select value={nameColor} onValueChange={setNameColor}>
-                  <SelectTrigger className="w-full md:w-96">
-                    <SelectValue placeholder="Pick a color..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NAME_COLORS.map(({ label, value }) => (
-                      <SelectItem key={value} value={value}>
-                        <span className="flex items-center gap-2">
-                          <span
-                            className="inline-block h-4 w-4 rounded-full border border-gray-300 shrink-0"
-                            style={{ backgroundColor: value }}
-                          />
-                          {label}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Preview Section */}
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Label>Signature Preview</Label>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      onClick={handleCopy}
-                      disabled={!selectedEmployee}
-                      variant={copied ? "default" : "outline"}
-                      className="rounded-full"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="h-4 w-4 mr-2" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy Signature
-                        </>
+                  {/* Manage Employees Section */}
+                  {showManageEmployees && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h3 className="font-medium text-gray-900 mb-4">Manage Employees</h3>
+                      <div className="max-h-80 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead className="text-left text-gray-500 border-b">
+                            <tr>
+                              <th className="pb-2 font-medium">Name</th>
+                              <th className="pb-2 font-medium hidden md:table-cell">Title</th>
+                              <th className="pb-2 font-medium hidden lg:table-cell">Email</th>
+                              <th className="pb-2 font-medium w-20 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {employees.map((employee) => (
+                              <tr key={employee.email} className="hover:bg-gray-100">
+                                <td className="py-2 pr-2">
+                                  <div className="font-medium text-gray-900">{employee.fullName}</div>
+                                  <div className="text-gray-500 md:hidden text-xs">{employee.jobTitle}</div>
+                                </td>
+                                <td className="py-2 pr-2 hidden md:table-cell text-gray-600 truncate max-w-[200px]">
+                                  {employee.jobTitle}
+                                </td>
+                                <td className="py-2 pr-2 hidden lg:table-cell text-gray-600">
+                                  {employee.email}
+                                </td>
+                                <td className="py-2 text-right">
+                                  <Button
+                                    onClick={() => handleDeleteEmployee(employee.email)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      {employees.length === 0 && (
+                        <p className="text-center text-gray-500 py-4">No employees added yet.</p>
                       )}
-                    </Button>
-                    <Button
-                      onClick={handleCopyForAppleMail}
-                      disabled={!selectedEmployee || copyingForAppleMail}
-                      variant="outline"
-                      className="rounded-full"
-                    >
-                      {copyingForAppleMail ? (
-                        <>Preparing…</>
-                      ) : (
-                        <>Copy for Apple Mail</>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Using Apple Mail? Use <strong>Copy for Apple Mail</strong> so the logo pastes correctly. Then in Mail, paste (Cmd+V) into the message or add via Mail → Preferences → Signatures.
-                </p>
-                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                  <iframe
-                    ref={previewFrameRef}
-                    title="Signature preview"
-                    className="w-full border-0 bg-white min-h-[200px]"
-                    style={{ maxHeight: '600px' }}
-                  />
-                </div>
-              </div>
+                    </div>
+                  )}
 
-              {/* Selected Employee Info */}
-              {currentEmployee && (
-                <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div><span className="font-medium">Name:</span> {currentEmployee.fullName}</div>
-                    <div><span className="font-medium">Title:</span> {currentEmployee.jobTitle}</div>
-                    <div><span className="font-medium">Email:</span> {currentEmployee.email}</div>
-                    <div><span className="font-medium">Telephone:</span> {currentEmployee.telephone}</div>
-                    {currentEmployee.cellphone && (
-                      <div><span className="font-medium">Cellphone:</span> {currentEmployee.cellphone}</div>
-                    )}
+                  {/* Employee Select */}
+                  <div className="space-y-2">
+                    <Label htmlFor="employee-select">Select Employee</Label>
+                    <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                      <SelectTrigger className="w-full md:w-96">
+                        <SelectValue placeholder="Choose your name..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {employees.map((employee) => (
+                          <SelectItem key={employee.email} value={employee.fullName}>
+                            {employee.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+                  {/* Name Color */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name-color">Color</Label>
+                    <Select value={nameColor} onValueChange={setNameColor}>
+                      <SelectTrigger className="w-full md:w-96">
+                        <SelectValue placeholder="Pick a color..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {NAME_COLORS.map(({ label, value }) => (
+                          <SelectItem key={value} value={value}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className="inline-block h-4 w-4 rounded-full border border-gray-300 shrink-0"
+                                style={{ backgroundColor: value }}
+                              />
+                              {label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Selected Employee Info */}
+                  {currentEmployee && (
+                    <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div><span className="font-medium">Name:</span> {currentEmployee.fullName}</div>
+                        <div><span className="font-medium">Title:</span> {currentEmployee.jobTitle}</div>
+                        <div><span className="font-medium">Email:</span> {currentEmployee.email}</div>
+                        <div><span className="font-medium">Telephone:</span> {currentEmployee.telephone}</div>
+                        {currentEmployee.cellphone && (
+                          <div><span className="font-medium">Cellphone:</span> {currentEmployee.cellphone}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column preview */}
+        <div className="flex-1 w-full">
+          <div className="flex h-full w-full items-start justify-center px-6 py-6 md:h-[calc(100vh-68px)] md:items-center">
+            <div className="w-full max-w-[40rem]">
+              <PreviewWindow footer={renderPreviewFooter()}>
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px]"
+                  style={{ maxHeight: '600px' }}
+                />
+              </PreviewWindow>
+              <p className="text-xs text-gray-500 mt-4 text-center">
+                Using Apple Mail? Use <strong>Copy for Apple Mail</strong> so the logo pastes correctly. Then in Mail, paste (Cmd+V) into the message or add via Mail → Preferences → Signatures.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <Toaster />
