@@ -5,7 +5,7 @@ import { Label } from '../components/label'
 import { Input } from '../components/input'
 import { Toaster } from '../components/sonner'
 import { toast } from 'sonner'
-import { Copy } from 'lucide-react'
+import { Copy, RotateCcw } from 'lucide-react'
 
 function Editor() {
   const [signatureHtml, setSignatureHtml] = useState('')
@@ -650,36 +650,72 @@ function Editor() {
           </div>
         </div>
 
-        {/* Main Preview Area */}
+        {/* Main Preview Area - Fake email client window */}
         <div className="flex-1 flex flex-col">
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <p className="hivory-paragraph-medium text-gray-600">
-                  Paste HTML, detect fields, edit values and generate. Your updated signature appears here.
-                </p>
-                <Button
-                  onClick={handleCopy}
-                  disabled={isCopyDisabled}
-                  variant="outline"
-                  className="rounded-full"
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Signature
-                </Button>
-              </div>
+              {/* Fake window chrome */}
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                {/* macOS-style title bar */}
+                <div className="flex items-center gap-2 h-8 px-3 bg-[#2d2d2d] rounded-t-lg">
+                  <div className="flex gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                    <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                    <span className="w-3 h-3 rounded-full bg-[#28c840]" />
+                  </div>
+                </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                <Label className="block text-sm font-medium text-gray-700 mb-3">
-                  Preview
-                </Label>
-                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                {/* Email header (To / Subject) */}
+                <div className="px-4 pt-4 pb-2 border-b border-gray-100 bg-white">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm font-bold text-gray-900 w-14 shrink-0">To:</span>
+                    <span
+                      className="flex-1 min-h-[28px] px-2 py-1 text-sm text-gray-500 rounded border border-[#86efac] bg-[#dcfce7]"
+                      aria-hidden
+                    >
+                      Your Recipient
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-900 w-14 shrink-0">Subject:</span>
+                    <span className="text-sm text-gray-700">Check out my new Email Signature</span>
+                  </div>
+                </div>
+
+                {/* Fake body lines */}
+                <div className="px-4 py-3 border-b border-gray-100 bg-white">
+                  <div className="h-3 bg-gray-200 rounded w-full max-w-[95%] mb-2" />
+                  <div className="h-3 bg-gray-200 rounded w-full max-w-[70%]" />
+                </div>
+
+                {/* Signature preview iframe */}
+                <div className="border border-gray-200 border-t-0 overflow-hidden bg-gray-50">
                   <iframe
                     ref={previewFrameRef}
                     title="Signature preview"
-                    className="w-full border-0 bg-white min-h-[200px]"
+                    className="w-full border-0 bg-white min-h-[200px] block"
                     style={{ maxHeight: '600px' }}
                   />
+                </div>
+
+                {/* Buttons below window (like the reference) */}
+                <div className="flex items-center justify-center gap-4 py-5 px-4 bg-white border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Clear all input fields
+                  </button>
+                  <Button
+                    onClick={handleCopy}
+                    disabled={isCopyDisabled}
+                    className="rounded-md bg-[#ea580c] hover:bg-[#c2410c] text-white px-5 py-2 font-medium"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy signature
+                  </Button>
                 </div>
               </div>
             </div>
