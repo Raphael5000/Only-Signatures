@@ -301,30 +301,32 @@ function Generator() {
           </div>
         </div>
 
-        {/* Main Preview Area - single iframe so ref always targets the visible preview; layout matches Editor (centred on desktop) */}
-        <div className="flex-1 w-full flex md:min-h-[calc(100vh-68px)] md:items-center md:justify-center px-6 py-6 md:py-0">
-          <div className="w-full max-w-[40rem] mx-auto">
-            <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center md:text-left">
-              Fill in your information and let AI create a world-class email signature
-            </p>
-            <PreviewWindow
-              footer={
-                <Button
-                  onClick={handleCopy}
-                  disabled={isCopyDisabled}
-                  className="rounded-full"
-                >
-                  <Copy className="h-4 w-4" />
-                  Copy signature
-                </Button>
-              }
-            >
-              <iframe
-                ref={previewFrameRef}
-                title="Signature preview"
-                className="w-full border-0 bg-white min-h-[200px]"
-              />
-            </PreviewWindow>
+        {/* Main Preview Area - single iframe; centering matches Editor (fixed height + flex center on desktop) */}
+        <div className="flex-1 w-full flex flex-col">
+          <div className="flex-1 flex md:items-center md:justify-center px-6 py-6 md:py-0 min-h-0">
+            <div className="w-full max-w-[40rem]">
+              <p className="hivory-paragraph-medium text-gray-600 mb-6 text-center md:text-left">
+                Fill in your information and let AI create a world-class email signature
+              </p>
+              <PreviewWindow
+                footer={
+                  <Button
+                    onClick={handleCopy}
+                    disabled={isCopyDisabled}
+                    className="rounded-full"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copy signature
+                  </Button>
+                }
+              >
+                <iframe
+                  ref={previewFrameRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[200px]"
+                />
+              </PreviewWindow>
+            </div>
           </div>
         </div>
       </div>
