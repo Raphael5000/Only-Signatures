@@ -47,6 +47,20 @@ const NAME_COLORS = [
 
 const defaultColor = NAME_COLORS[0]
 
+// Plain-text version for clipboard (Apple Mail and other clients use this)
+function htmlToPlainText(html) {
+  if (!html) return ''
+  const div = typeof document !== 'undefined' ? document.createElement('div') : null
+  if (!div) return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  div.innerHTML = html
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim()
+}
+
+// Wrap in minimal document so Apple Mail and others accept the paste
+function wrapHtmlForClipboard(html) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`
+}
+
 function generateSignature(employee, nameColor = defaultColor.value, logoUrl = defaultColor.logoUrl) {
   const { fullName, jobTitle, cellphone, telephone, email } = employee
   
@@ -70,6 +84,7 @@ function MoxiiAfrica() {
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [nameColor, setNameColor] = useState('#F94C1E')
   const [copied, setCopied] = useState(false)
+  const [copyingForAppleMail, setCopyingForAppleMail] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [showManageEmployees, setShowManageEmployees] = useState(false)
   const [newEmployee, setNewEmployee] = useState({
@@ -121,39 +136,81 @@ function MoxiiAfrica() {
     updatePreview('')
   }, [])
 
+  const writeToClipboard = async (html, showSuccess = true) => {
+    const wrapped = wrapHtmlForClipboard(html)
+    const plain = htmlToPlainText(html)
+    if (navigator.clipboard && window.ClipboardItem) {
+      const items = {
+        "text/html": new Blob([wrapped], { type: "text/html; charset=utf-8" }),
+        "text/plain": new Blob([plain], { type: "text/plain; charset=utf-8" }),
+      }
+      await navigator.clipboard.write([new ClipboardItem(items)])
+    } else {
+      await navigator.clipboard.writeText(plain)
+    }
+    setCopied(true)
+    if (showSuccess) {
+      toast.success("Signature Copied", {
+        description: "Paste into your email (e.g. Cmd+V in Mail)"
+      })
+    }
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const handleCopy = async () => {
     if (!signatureHtml) return
-
-    // Try to use Clipboard API with text/html for rich paste
-    if (navigator.clipboard && window.ClipboardItem) {
+    try {
+      await writeToClipboard(signatureHtml)
+    } catch (err) {
+      console.warn("Clipboard failed, falling back to text.", err)
       try {
-        const blob = new Blob([signatureHtml], { type: "text/html" })
-        const data = [new ClipboardItem({ "text/html": blob })]
-        await navigator.clipboard.write(data)
+        await navigator.clipboard.writeText(htmlToPlainText(signatureHtml))
         setCopied(true)
-        toast.success("Signature Copied", {
-          description: "Paste it into your email client"
+        toast.success("Signature Copied (plain text)", {
+          description: "Paste into your email client"
         })
         setTimeout(() => setCopied(false), 2000)
-        return
-      } catch (err) {
-        console.warn("Rich clipboard failed, falling back to text-only copy.", err)
+      } catch (e) {
+        toast.error("Copy Failed", {
+          description: "Please try selecting and copying manually"
+        })
       }
     }
+  }
 
-    // Fallback: copy as text
+  const handleCopyForAppleMail = async () => {
+    if (!signatureHtml || !selectedColorOption?.logoUrl) {
+      handleCopy()
+      return
+    }
+    setCopyingForAppleMail(true)
     try {
-      await navigator.clipboard.writeText(signatureHtml)
-      setCopied(true)
-      toast.success("Signature Copied", {
-        description: "Paste it into your email client"
+      const res = await fetch(selectedColorOption.logoUrl, { mode: "cors" })
+      if (!res.ok) throw new Error("Fetch failed")
+      const blob = await res.blob()
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
       })
-      setTimeout(() => setCopied(false), 2000)
+      const htmlWithEmbeddedLogo = signatureHtml.replace(
+        /<img[^>]+src="[^"]*"[^>]*>/i,
+        () => `<img src="${base64}" alt="Moxii Africa Logo" style="display:block;height:80px;width:auto;border:0px">`
+      )
+      await writeToClipboard(htmlWithEmbeddedLogo)
+      toast.success("Copied for Apple Mail", {
+        description: "Paste in Mail (Cmd+V). Image is embedded."
+      })
     } catch (err) {
-      console.error("Copy failed", err)
-      toast.error("Copy Failed", {
-        description: "Please try selecting and copying manually"
+      console.warn("Could not embed logo for Apple Mail, copying standard HTML.", err)
+      await writeToClipboard(signatureHtml, false)
+      toast.info("Tip for Apple Mail", {
+        description: "Use Chrome to copy, or Mail → Preferences → Signatures → + and paste here"
+        + (err?.message ? " (image will load from link)." : ".")
       })
+    } finally {
+      setCopyingForAppleMail(false)
     }
   }
 
@@ -433,27 +490,44 @@ function MoxiiAfrica() {
 
               {/* Preview Section */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Label>Signature Preview</Label>
-                  <Button
-                    onClick={handleCopy}
-                    disabled={!selectedEmployee}
-                    variant={copied ? "default" : "outline"}
-                    className="rounded-full"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy Signature
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      onClick={handleCopy}
+                      disabled={!selectedEmployee}
+                      variant={copied ? "default" : "outline"}
+                      className="rounded-full"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy Signature
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleCopyForAppleMail}
+                      disabled={!selectedEmployee || copyingForAppleMail}
+                      variant="outline"
+                      className="rounded-full"
+                    >
+                      {copyingForAppleMail ? (
+                        <>Preparing…</>
+                      ) : (
+                        <>Copy for Apple Mail</>
+                      )}
+                    </Button>
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500">
+                  Using Apple Mail? Use <strong>Copy for Apple Mail</strong> so the logo pastes correctly. Then in Mail, paste (Cmd+V) into the message or add via Mail → Preferences → Signatures.
+                </p>
                 <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <iframe
                     ref={previewFrameRef}
