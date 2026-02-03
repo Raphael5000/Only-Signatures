@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/card'
 import { Input } from '../components/input'
 import { Label } from '../components/label'
-import { Search } from 'lucide-react'
+import { Button } from '../components/button'
+import { Search, X } from 'lucide-react'
 
 const DATA_URL = '/data/inspiration-signatures.json'
 
@@ -24,11 +25,37 @@ function filterSignatures(signatures, query) {
   })
 }
 
+function SignaturePreview({ signatureHtml, className = '', thumbnail = false }) {
+  const scale = thumbnail ? 0.48 : 1
+  return (
+    <div
+      className={className}
+      style={
+        thumbnail
+          ? {
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              width: `${100 / scale}%`,
+              minHeight: `${220 / scale}px`,
+            }
+          : undefined
+      }
+    >
+      <div
+        className="bg-white p-4 min-h-[120px]"
+        style={thumbnail ? { width: '320px' } : undefined}
+        dangerouslySetInnerHTML={{ __html: signatureHtml }}
+      />
+    </div>
+  )
+}
+
 function Inspiration() {
   const [signatures, setSignatures] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [detailSignature, setDetailSignature] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -59,7 +86,7 @@ function Inspiration() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Inspiration</h1>
           <p className="text-gray-600">
-            Browse signature styles to get ideas. Search by style, category or keyword.
+            Browse signature styles to get ideas. Search by style, category or keyword. Click a tile to view full size.
           </p>
         </div>
 
@@ -99,13 +126,31 @@ function Inspiration() {
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((sig) => (
-              <Card key={sig.id} className="overflow-hidden bg-white hover:shadow-md transition-shadow">
-                <div className="aspect-[2/1] bg-gray-100 overflow-hidden">
-                  <img
-                    src={sig.imageUrl}
-                    alt=""
-                    className="w-full h-full object-cover object-top"
-                  />
+              <Card
+                key={sig.id}
+                className={`overflow-hidden bg-white transition-shadow ${
+                  sig.signatureHtml
+                    ? 'cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-gray-200'
+                    : 'hover:shadow-md'
+                }`}
+                onClick={() => sig.signatureHtml && setDetailSignature(sig)}
+              >
+                <div className="aspect-[2/1] bg-gray-100 overflow-hidden flex items-center justify-center p-2">
+                  {sig.signatureHtml ? (
+                    <div className="w-full h-full overflow-hidden flex items-start justify-center bg-white rounded">
+                      <SignaturePreview
+                        signatureHtml={sig.signatureHtml}
+                        thumbnail
+                        className="origin-top"
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={sig.imageUrl}
+                      alt=""
+                      className="w-full h-full object-cover object-top"
+                    />
+                  )}
                 </div>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -135,12 +180,49 @@ function Inspiration() {
                       ))}
                     </div>
                   )}
+                  {sig.signatureHtml && (
+                    <p className="text-xs text-gray-500 mt-2">Click to view full signature</p>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* Full-signature modal */}
+      {detailSignature?.signatureHtml && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setDetailSignature(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="View signature"
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+              <h2 className="text-lg font-semibold text-gray-900">{detailSignature.title}</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDetailSignature(null)}
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="p-6">
+              <div
+                className="bg-white border border-gray-200 rounded-lg p-6 inline-block min-w-0"
+                dangerouslySetInnerHTML={{ __html: detailSignature.signatureHtml }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

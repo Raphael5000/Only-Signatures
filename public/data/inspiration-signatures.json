@@ -2,6 +2,14 @@
   "updated": "2026-02-03",
   "signatures": [
     {
+      "id": "compact-with-logo",
+      "title": "Compact with Logo",
+      "description": "Name, title, logo and contact rows with studio and mobile. Links for website and socials. Clean and professional.",
+      "category": "Professional",
+      "tags": ["minimal", "logo", "contact", "professional", "social"],
+      "signatureHtml": "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"border-collapse:collapse\"><tbody><tr><td style=\"border-collapse:collapse;font-family:Arial;font-weight:bold;line-height:18px;color:rgb(29,36,41);padding:0px;font-size:12px!important\">Jordan Taylor</td></tr><tr><td style=\"border-collapse:collapse;font-family:Arial;font-size:10px;text-transform:uppercase;line-height:15px;color:rgb(92,104,113);padding:0px\">Digital Project Manager</td></tr><tr><td style=\"border-collapse:collapse;padding:20px 0px 16px\"><img width=\"200\" height=\"35\" src=\"https://placehold.co/200x35/f0f0f0/666?text=Company+Logo\" style=\"font-family:Arial,sans-serif\"></td></tr><tr><td style=\"border-collapse:collapse;padding:0px\"></td></tr><tr><td width=\"\" valign=\"top\" align=\"left\" style=\"border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;line-height:18px;color:rgb(121,127,136)\"><span style=\"color:rgb(92,104,113);font-size:10px!important\">STUDIO&nbsp;</span><a href=\"tel:+27210000000\" style=\"text-decoration:none!important;color:rgb(42,114,245)!important\" target=\"_blank\"><strong>+27 21 000 0000</strong></a></td></tr><tr><td width=\"\" valign=\"top\" align=\"left\" style=\"border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;line-height:18px;color:rgb(121,127,136)\"><span style=\"color:rgb(92,104,113);font-size:10px!important\">MOBILE&nbsp;</span><a href=\"tel:+27830000000\" style=\"text-decoration:none!important;color:rgb(42,114,245)!important\" target=\"_blank\"><strong>+27 83 000 0000</strong></a></td></tr><tr><td style=\"border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;line-height:18px;padding:20px 0px 0px\"><a href=\"https://example.com\" style=\"color:rgb(42,114,245)!important;text-decoration:none!important\" target=\"_blank\"><strong>example.com</strong></a><span style=\"color:rgb(92,104,113)\">&nbsp;|&nbsp;</span><a href=\"https://example.com/instagram\" style=\"color:rgb(42,114,245)!important;text-decoration:none!important\" target=\"_blank\"><strong>Instagram</strong></a><span style=\"color:rgb(92,104,113)\">&nbsp;|&nbsp;</span><a href=\"https://example.com/linkedin\" style=\"color:rgb(42,114,245)!important;text-decoration:none!important\" target=\"_blank\"><strong>LinkedIn</strong></a></td></tr></tbody></table>"
+    },
+    {
       "id": "minimal-modern",
       "title": "Minimal Modern",
       "description": "Clean single-line signature with name, title and one link. Perfect for startups and freelancers.",

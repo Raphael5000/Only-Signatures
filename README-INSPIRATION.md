@@ -25,14 +25,17 @@ The **Inspiration** page shows a searchable gallery of signature styles. The dat
 }
 ```
 
-| Field         | Required | Description |
-|---------------|----------|-------------|
-| `id`          | Yes      | Unique slug (e.g. `minimal-modern`). Used as React key. |
-| `title`       | Yes      | Title shown on the card. |
-| `description` | No       | Body text under the title (searchable). |
-| `category`    | No       | Category label (e.g. "Minimal", "Corporate"). Shown and searchable. |
-| `tags`        | No       | Array of strings. All are searchable. |
-| `imageUrl`    | Yes      | Full URL to the preview image (screenshot of the signature). |
+| Field           | Required | Description |
+|-----------------|----------|-------------|
+| `id`            | Yes      | Unique slug (e.g. `minimal-modern`). Used as React key. |
+| `title`         | Yes      | Title shown on the card. |
+| `description`   | No       | Body text under the title (searchable). |
+| `category`      | No       | Category label (e.g. "Minimal", "Corporate"). Shown and searchable. |
+| `tags`          | No       | Array of strings. All are searchable. |
+| `imageUrl`      | No*      | Full URL to the preview image. *Omit if using `signatureHtml`. |
+| `signatureHtml` | No       | Raw HTML of the signature. If set, the card shows a **rendered preview** as the thumbnail and **clicking opens a full-size view** in a modal. Use this when you want the tile to show the live signature instead of a static image. |
+
+You must provide either `imageUrl` or `signatureHtml` (or both; `signatureHtml` takes precedence for the thumbnail and click-to-expand).
 
 Search matches **title**, **description**, **category**, and **tags** (case-insensitive).
 
