@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../components/button'
 import { Textarea } from '../components/textarea'
 import { Label } from '../components/label'
@@ -21,6 +22,17 @@ function Editor() {
   const [isCopyDisabled, setIsCopyDisabled] = useState(true)
   const [isDetecting, setIsDetecting] = useState(false)
   const previewFrameRef = useRef(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Accept pre-filled HTML from Inspiration page navigation
+  useEffect(() => {
+    if (location.state?.signatureHtml) {
+      setSignatureHtml(location.state.signatureHtml)
+      // Clear the navigation state so it doesn't persist on refresh
+      navigate('/', { replace: true, state: {} })
+    }
+  }, [location.state])
 
   const resetUI = () => {
     setOriginalHtml('')
