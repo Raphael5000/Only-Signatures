@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/card'
 import { Input } from '../components/input'
 import { Label } from '../components/label'
 import { Button } from '../components/button'
-import { Search, X } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/dropdown-menu'
+import PreviewWindow from '../components/preview-window'
+import { Toaster } from '../components/sonner'
+import { toast } from 'sonner'
+import { Search, X, ChevronDown, Pencil, Sparkles } from 'lucide-react'
 
 const DATA_URL = '/data/inspiration-signatures.json'
 
@@ -56,6 +66,50 @@ function Inspiration() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [detailSignature, setDetailSignature] = useState(null)
+  const navigate = useNavigate()
+  const modalPreviewRef = useRef(null)
+
+  const updateModalPreview = useCallback((html) => {
+    if (!modalPreviewRef.current) return
+    const doc = modalPreviewRef.current.contentDocument || modalPreviewRef.current.contentWindow.document
+    doc.open()
+    doc.write(
+      "<!doctype html><html><head><meta charset='utf-8'></head><body style='margin:0;padding:0;'>" +
+      html +
+      "</body></html>"
+    )
+    doc.close()
+    setTimeout(() => {
+      try {
+        const body = doc.body
+        const height = body.scrollHeight || 150
+        modalPreviewRef.current.style.height = Math.max(height, 150) + "px"
+      } catch (e) { /* ignore */ }
+    }, 50)
+  }, [])
+
+  // Update iframe when modal opens
+  useEffect(() => {
+    if (detailSignature?.signatureHtml) {
+      // Small delay to ensure iframe is mounted
+      const timer = setTimeout(() => {
+        updateModalPreview(detailSignature.signatureHtml)
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [detailSignature, updateModalPreview])
+
+  const handleUseInEditor = () => {
+    if (!detailSignature?.signatureHtml) return
+    setDetailSignature(null)
+    navigate('/', { state: { signatureHtml: detailSignature.signatureHtml } })
+  }
+
+  const handleUseInGenerator = () => {
+    toast.info('Coming Soon', {
+      description: 'Using signatures in the generator will be available soon.',
+    })
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -203,26 +257,87 @@ function Inspiration() {
             className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+            {/* Header with title and Use button */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-semibold text-gray-900">{detailSignature.title}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDetailSignature(null)}
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="rounded-full">
+                      Use
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleUseInEditor}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Use in Editor
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer text-gray-400"
+                      onClick={handleUseInGenerator}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Use in Generator
+                      <span className="ml-auto text-xs text-gray-400">Soon</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDetailSignature(null)}
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
+
+            {/* Email preview */}
             <div className="p-6">
-              <div
-                className="bg-white border border-gray-200 rounded-lg p-6 inline-block min-w-0"
-                dangerouslySetInnerHTML={{ __html: detailSignature.signatureHtml }}
-              />
+              <PreviewWindow>
+                <iframe
+                  ref={modalPreviewRef}
+                  title="Signature preview"
+                  className="w-full border-0 bg-white min-h-[150px] block"
+                />
+              </PreviewWindow>
+
+              {/* Signature info */}
+              {(detailSignature.description || detailSignature.category || (Array.isArray(detailSignature.tags) && detailSignature.tags.length > 0)) && (
+                <div className="mt-4 space-y-2">
+                  {detailSignature.category && (
+                    <span className="inline-block text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      {detailSignature.category}
+                    </span>
+                  )}
+                  {detailSignature.description && (
+                    <p className="text-sm text-gray-600">{detailSignature.description}</p>
+                  )}
+                  {Array.isArray(detailSignature.tags) && detailSignature.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {detailSignature.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      <Toaster />
     </div>
   )
 }
